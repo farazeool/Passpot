@@ -314,20 +314,14 @@ impl Contract {
 
     // ---------- callbacks ----------
 
+    /// The factory's answer about the new DAO. Its return value is the DAO
+    /// deployment's (empty), so only success or failure matters here.
     #[private]
-    pub fn on_dao_created(
-        &mut self,
-        committee_id: u64,
-        organizer: AccountId,
-        deposit: NearToken,
-        #[callback_result] result: Result<bool, PromiseError>,
-    ) -> bool {
-        let ok = matches!(result, Ok(true));
+    pub fn on_dao_created(&mut self, committee_id: u64, organizer: AccountId, deposit: NearToken) -> bool {
+        let ok = env::promise_result_checked(0, 64).is_ok();
         let c = self.committee_mut(committee_id);
         if ok {
-            c.dao_ready = true;
-            let dao = c.dao.clone();
-            c.push_event(0, EventKind::DaoReady, dao, 0, None, now_ms());
+            mark_dao_ready(c);
         } else {
             // The factory refunds the deposit to this contract; pass it back.
             c.dao = None;
@@ -338,14 +332,38 @@ impl Contract {
         ok
     }
 
+    /// Re-check a committee's DAO by asking it for its config. Anyone can call it.
+    /// Only the Sputnik factory can create accounts under its name, so an answer
+    /// means the DAO exists with the policy this contract gave it.
+    pub fn recheck_dao(&mut self, committee_id: u64) -> Promise {
+        let c = self.committees.get(&committee_id).expect("No such committee");
+        require!(!c.dao_ready, "The DAO is already confirmed");
+        let dao = c.dao.clone().expect("Committee has no DAO");
+        Promise::new(dao)
+            .function_call("get_config".to_string(), b"{}".to_vec(), NearToken::from_yoctonear(0), Gas::from_tgas(5))
+            .then(
+                Self::ext(env::current_account_id())
+                    .with_static_gas(GAS_FOR_ON_DAO_CREATED)
+                    .on_dao_checked(committee_id),
+            )
+    }
+
+    #[private]
+    pub fn on_dao_checked(&mut self, committee_id: u64) -> bool {
+        let ok = env::promise_result_checked(0, 4096).is_ok();
+        if ok {
+            mark_dao_ready(self.committee_mut(committee_id));
+        }
+        ok
+    }
+
     #[private]
     pub fn on_forwarded(
         &mut self,
         committee_id: u64,
         amount: U128,
-        #[callback_result] result: Result<(), PromiseError>,
     ) -> bool {
-        if result.is_ok() {
+        if env::promise_result_checked(0, 1024).is_ok() {
             return true;
         }
         let held = self.unforwarded.get(&committee_id).copied().unwrap_or(0);
@@ -404,9 +422,9 @@ impl Contract {
         committee_id: u64,
         to: AccountId,
         amount: U128,
-        #[callback_result] result: Result<(), PromiseError>,
     ) -> bool {
-        if result.is_ok() {
+        // Only success matters: Sputnik's act_proposal may return any value.
+        if env::promise_result_checked(0, 4096).is_ok() {
             return true;
         }
         self.record_owed(committee_id, &to, amount.0);
@@ -585,6 +603,14 @@ impl Contract {
     }
 }
 
+fn mark_dao_ready(c: &mut Committee) {
+    if !c.dao_ready {
+        c.dao_ready = true;
+        let dao = c.dao.clone();
+        c.push_event(0, EventKind::DaoReady, dao, 0, None, now_ms());
+    }
+}
+
 fn owed_key(committee_id: u64, account_id: &AccountId) -> String {
     format!("{}:{}", committee_id, account_id)
 }
@@ -663,8 +689,9 @@ mod tests {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
         let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
-        callback(0, PromiseResult::Successful(b"true".to_vec()));
-        assert!(c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT, Ok(true)));
+        // Sputnik's factory hands back the deployment's empty value.
+        callback(0, PromiseResult::Successful(vec![]));
+        assert!(c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT));
         for who in MEMBERS {
             pay(&mut c, who, "join", id, 100, 0);
         }
@@ -742,6 +769,19 @@ mod tests {
     }
 
     #[test]
+    fn a_dao_can_be_confirmed_later_by_asking_it() {
+        let mut c = new_contract();
+        testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        set("anyone.testnet", 1);
+        let _ = c.recheck_dao(id);
+        assert!(receipt_methods().contains(&("app-fatneek-1.sputnikv2.testnet".into(), "get_config".into())));
+        callback(2, PromiseResult::Successful(b"{\"name\":\"x\"}".to_vec()));
+        assert!(c.on_dao_checked(id));
+        assert!(c.get_committee(id).unwrap().committee.dao_ready);
+    }
+
+    #[test]
     #[should_panic(expected = "Attach 6 NEAR")]
     fn too_small_a_dao_deposit_is_refused() {
         let mut c = new_contract();
@@ -755,7 +795,7 @@ mod tests {
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
         let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
         callback(0, PromiseResult::Failed);
-        assert!(!c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT, Err(PromiseError::Failed)));
+        assert!(!c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT));
         assert_eq!(c.get_committee(id).unwrap().committee.dao, None);
         set("ayesha.testnet", 1);
         let _ = c.withdraw_near_refund();
@@ -797,7 +837,7 @@ mod tests {
     fn a_failed_payout_is_owed_and_can_be_retried() {
         let (mut c, id) = setup_dao();
         callback(1, PromiseResult::Failed);
-        c.on_payout(id, acc("bilal.testnet"), U128(150), Err(PromiseError::Failed));
+        c.on_payout(id, acc("bilal.testnet"), U128(150));
         assert_eq!(c.get_owed(id, acc("bilal.testnet")).0, 150);
         set("anyone.testnet", 2);
         assert_eq!(c.retry_payout(id, acc("bilal.testnet")).0, 150);
@@ -808,7 +848,7 @@ mod tests {
     fn a_failed_forward_is_tracked_and_can_be_retried() {
         let (mut c, id) = setup_dao();
         callback(1, PromiseResult::Failed);
-        c.on_forwarded(id, U128(100), Err(PromiseError::Failed));
+        c.on_forwarded(id, U128(100));
         assert_eq!(c.get_committee(id).unwrap().unforwarded.0, 100);
         set("anyone.testnet", 2);
         assert_eq!(c.retry_forward(id).0, 100);

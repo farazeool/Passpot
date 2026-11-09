@@ -7,7 +7,9 @@
 param(
     [Parameter(Mandatory = $true)][string]$Account,
     [string]$UsdName = "usd",
-    [string]$AppName = "cmt"
+    [string]$AppName = "cmt",
+    # Reuse an existing DAO committee instead of creating a new one (saves 6 NEAR).
+    [int]$CommitteeId = 0
 )
 
 # Call near.exe directly: the npm wrapper hides failures (always exits 0).
@@ -52,15 +54,26 @@ foreach ($m in $Members) {
     if ([decimal]($bal.Trim('"')) -lt 100000000) { Call $Usd 'faucet' '{}' $m | Out-Null }
 }
 
-Step "Creating a committee with its own Sputnik DAO (attaching 6 NEAR)"
-$id = Call $App 'create_committee' '{"name":"Family DAO test","amount":"10000000","size":3,"round_secs":60,"mode":"Draw"}' $Account '6 NEAR' '300.0 Tgas'
-$id = ($id -split "`n")[-1].Trim()
-if ($id -notmatch '^\d+$') { Stop "Could not read the committee id (got '$id')." }
-Write-Host "Committee id: $id"
+if ($CommitteeId -gt 0) {
+    $id = "$CommitteeId"
+    Write-Host "Reusing committee $id"
+} else {
+    Step "Creating a committee with its own Sputnik DAO (attaching 6 NEAR)"
+    $id = Call $App 'create_committee' '{"name":"Family DAO test","amount":"10000000","size":3,"round_secs":60,"mode":"Draw"}' $Account '6 NEAR' '300.0 Tgas'
+    $id = ($id -split "`n")[-1].Trim()
+    if ($id -notmatch '^\d+$') { Stop "Could not read the committee id (got '$id')." }
+    Write-Host "Committee id: $id"
+}
 
 $c = View $App 'get_committee' ('{"committee_id":' + $id + '}') | ConvertFrom-Json
 $Dao = $c.dao
-if (-not $c.dao_ready) { Stop "The DAO $Dao was not created." }
+if (-not $Dao) { Stop "Committee $id has no DAO." }
+if (-not $c.dao_ready) {
+    Step "Confirming the DAO exists (asks the DAO for its config)"
+    Call $App 'recheck_dao' ('{"committee_id":' + $id + '}') $Account | Out-Null
+    $c = View $App 'get_committee' ('{"committee_id":' + $id + '}') | ConvertFrom-Json
+    if (-not $c.dao_ready) { Stop "The DAO $Dao could not be confirmed." }
+}
 Write-Host "DAO is live: $Dao" -ForegroundColor Green
 
 Step "Members join with a 10 tUSD deposit (forwarded to the DAO)"
