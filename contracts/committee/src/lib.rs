@@ -219,6 +219,7 @@ impl Contract {
     /// Send it with 300 Tgas: a DAO payout files and approves a proposal.
     pub fn advance_round(&mut self, committee_id: u64) -> U128 {
         let mut c = self.committees.get(&committee_id).expect("No such committee").clone();
+        let round = c.round;
         let before: Vec<(u32, u32)> = c.members.iter().map(|m| (m.on_time, m.missed)).collect();
         let seed = env::random_seed();
         let rep = &self.reputation;
@@ -246,7 +247,7 @@ impl Contract {
         let sent = transfers.iter().map(|t| t.amount).sum::<u128>();
         self.committees.insert(committee_id, c);
         for t in transfers {
-            self.send(committee_id, t);
+            self.send(committee_id, t, round);
         }
         U128(sent)
     }
@@ -255,8 +256,9 @@ impl Contract {
     pub fn claim(&mut self, committee_id: u64) -> U128 {
         let c = self.committee_mut(committee_id);
         let t = c.claim(&env::predecessor_account_id(), now_ms());
+        let round = c.round;
         let amount = t.amount;
-        self.send(committee_id, t);
+        self.send(committee_id, t, round);
         U128(amount)
     }
 
@@ -264,7 +266,8 @@ impl Contract {
     pub fn retry_payout(&mut self, committee_id: u64, account_id: AccountId) -> U128 {
         let amount = self.owed.remove(&owed_key(committee_id, &account_id)).unwrap_or(0);
         require!(amount > 0, "Nothing owed");
-        self.send(committee_id, Transfer { to: account_id, amount });
+        let round = self.committees.get(&committee_id).map(|c| c.round).unwrap_or(0);
+        self.send(committee_id, Transfer { to: account_id, amount }, round);
         U128(amount)
     }
 
@@ -379,6 +382,7 @@ impl Contract {
         committee_id: u64,
         to: AccountId,
         amount: U128,
+        round: u32,
         #[callback_result] result: Result<u64, PromiseError>,
     ) -> PromiseOrValue<bool> {
         let proposal_id = match result {
@@ -391,7 +395,6 @@ impl Contract {
         let c = self.committee_mut(committee_id);
         let dao = c.dao.clone().expect("Committee has no DAO");
         let kind = transfer_kind(&c.token, &to, amount.0);
-        let round = c.round;
         c.push_event(
             round,
             EventKind::DaoProposal,
@@ -556,7 +559,7 @@ impl Contract {
 
     /// Pay someone from the committee's vault: through a DAO Transfer proposal
     /// when the committee has a DAO, or straight from this contract otherwise.
-    fn send(&self, committee_id: u64, t: Transfer) {
+    fn send(&self, committee_id: u64, t: Transfer, round: u32) {
         if t.amount == 0 {
             return;
         }
@@ -569,7 +572,7 @@ impl Contract {
             Some(dao) => {
                 let args = json!({
                     "proposal": {
-                        "description": format!("Committee #{} round {}: pay {} by the committee's rules", committee_id, c.round, t.to),
+                        "description": format!("Committee #{} round {}: pay {} by the committee's rules", committee_id, round, t.to),
                         "kind": transfer_kind(&c.token, &t.to, t.amount),
                     }
                 });
@@ -583,7 +586,7 @@ impl Contract {
                     .then(
                         Self::ext(env::current_account_id())
                             .with_static_gas(GAS_FOR_ON_PROPOSAL_ADDED)
-                            .on_proposal_added(committee_id, t.to, U128(t.amount)),
+                            .on_proposal_added(committee_id, t.to, U128(t.amount), round),
                     )
                     .detach();
             }
@@ -826,11 +829,12 @@ mod tests {
         callback(61_000, PromiseResult::Successful(b"4".to_vec()));
         let winner = c.get_committee(id).unwrap().committee.events.iter().rev()
             .find(|e| e.kind == EventKind::Payout).unwrap().account_id.clone().unwrap();
-        let _ = c.on_proposal_added(id, winner.clone(), U128(150), Ok(4));
+        let _ = c.on_proposal_added(id, winner.clone(), U128(150), 1, Ok(4));
         assert!(receipt_methods().contains(&(dao, "act_proposal".into())));
         let ev = c.get_committee(id).unwrap().committee.events.last().cloned().unwrap();
         assert_eq!(ev.kind, EventKind::DaoProposal);
         assert_eq!(ev.note.as_deref(), Some("proposal 4"));
+        assert_eq!(ev.round, 1, "the proposal is filed under the round it pays for");
     }
 
     #[test]

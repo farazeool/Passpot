@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* Committee: the look of a hand-kept committee register.
+   Ink-blue on cool paper, one marigold accent for the pot and whose turn it is. */
+:root {
+  --font-public-sans: "Public Sans Variable";
+  --font-familjen: "Familjen Grotesk Variable";
+  --paper: #f5f6f2;
+  --sheet: #ffffff;
+  --ink: #22306b;
+  --ink-soft: #4a5687;
+  --text: #1b1f2e;
+  --muted: #5d6273;
+  --rule: #dde0e6;
+  --rule-strong: #c4c8d2;
+  --marigold: #e3a21a;
+  --marigold-wash: #fbf0d6;
+  --paid: #2e7d5b;
+  --paid-wash: #e3f1ea;
+  --missed: #b8432f;
+  --missed-wash: #f7e4df;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-marigold: var(--marigold);
+  --color-marigold-wash: var(--marigold-wash);
+  --color-paid: var(--paid);
+  --color-paid-wash: var(--paid-wash);
+  --color-missed: var(--missed);
+  --color-missed-wash: var(--missed-wash);
+  --font-sans: var(--font-public-sans);
+  --font-display: var(--font-familjen);
+}
+
+html {
+  background: var(--paper);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-public-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.font-display {
+  font-family: var(--font-familjen), var(--font-public-sans), sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ruled paper for the register. */
+.ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 43px,
+    var(--rule) 43px,
+    var(--rule) 44px
+  );
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #18225a;
+}
+.btn-pot {
+  background: var(--marigold);
+  color: #241a02;
+}
+.btn-pot:hover:not(:disabled) {
+  background: #d4940d;
+}
+.btn-quiet {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+.btn-quiet:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.field {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--sheet);
+  color: var(--text);
+}
+.field:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+  border-color: var(--ink);
+}
+
+a.link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+}
+a.link:hover {
+  text-decoration-color: var(--ink);
+}
+
+/* The pot passing between members. */
+@keyframes pass {
+  from {
+    transform: rotate(var(--from));
+  }
+  to {
+    transform: rotate(var(--to));
+  }
+}
+
+@keyframes draw-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

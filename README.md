@@ -2,23 +2,57 @@
 
 **A trusted committee without needing to trust the organizer.**
 
-Committees (ROSCAs, chit funds) are how millions of families in Pakistan, India and the Gulf save and borrow without banks. Everyone pays in each month and one member takes the whole pot, until everyone has had a turn. They break when someone takes the pot early and stops paying, when the organizer disappears with the cash, or when nobody can prove who paid.
+Committees (ROSCAs, chit funds, *BC*) are how millions of families in Pakistan, India and the Gulf save and borrow without banks. Everyone pays the same amount each month and one member takes the whole pot, until everyone has had a turn.
+
+They break in three ways:
+- **Someone takes the pot early and stops paying.** That's why committees only work among close family.
+- **The organizer holds all the cash** and can disappear with it.
+- **Nobody can prove who paid**, so disputes happen over notebooks and WhatsApp.
 
 Committee runs the whole circle on NEAR:
 
-- **The pot pays out by rule.** Each round the contract picks the recipient: an on-chain lucky draw (default), an agreed order, or an optional discount bid.
-- **Skipping doesn't break the circle.** Part of an early payout is held back and released as you keep paying; a missed payment is covered from it, then from your deposit.
-- **Reliability becomes portable.** Finished committees build a reputation that lowers your holdback next time.
+| Problem | What Committee does |
+| --- | --- |
+| The organizer holds the cash | Each committee gets its **own Sputnik DAO**. Its only council member is the Committee contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
+| Someone takes the pot and stops paying | Early winners have part of the pot **held back** and released as they keep paying. A missed payment is covered from holdback, then from their deposit, so the next winner still gets the full pot. |
+| Who gets the pot is rigged | An **on-chain lucky draw** using NEAR's random seed (or an agreed order, or discount bidding). The seed is recorded, so anyone can replay the draw. |
+| Nobody can prove who paid | Every payment, payout and draw is an on-chain event. A **Verify page** re-checks everything in your browser, straight from the chain. |
+| Trust doesn't travel | Finished committees build a **reputation** that lowers your holdback next time: 50% for new members, 25% after one clean committee, none after three. |
 
-> Built at NEAR HACKATHON for the Social Money and Real-World Money tracks. Work in progress: this README grows as features land.
+> Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
+
+## Try it
+
+- **Live app:** _(Vercel URL)_. Use **Try a demo committee** to play three members without a wallet, or connect a NEAR testnet wallet.
+- **Contracts on testnet:** Committee `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
+- **A real committee DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
+
+## How the money moves
+
+```
+member ──ft_transfer_call──▶ Committee contract ──ft_transfer──▶ committee's Sputnik DAO
+                                   │                                     │
+                    rules: draw, holdback,              add_proposal(Transfer) + act_proposal(VoteApprove)
+                    default cover, reputation                            │
+                                   └──────────── payout ◀────────────────┘
+```
+
+1. **Create.** The organizer attaches 6 NEAR. The contract asks the Sputnik factory (`sputnikv2.testnet`) for a DAO whose only council member is the contract. The exact policy is public via `get_dao_policy`.
+2. **Join.** Each member locks one contribution as a deposit (`ft_transfer_call` with `{"action":"join"}`). It's forwarded straight to the DAO.
+3. **Pay.** Each round, members pay in (`{"action":"contribute"}`), forwarded to the DAO.
+4. **Close the round.** Anyone can call `advance_round` once everyone has paid or the time is up. The contract covers misses, picks the recipient, then files a Transfer proposal on the DAO and approves it. The DAO pays.
+5. **Claim.** After the last round, members take back their deposit, any remaining holdback and shared bid discounts, also through DAO proposals.
+
+Anything that fails partway (a transfer, a forward, the DAO's reply) is recorded and can be retried by anyone: `retry_payout`, `retry_forward`, `recheck_dao`. Nothing is lost.
 
 ## What's here
 
 | Path | What it is |
 | --- | --- |
-| `contracts/committee` | The Committee contract (Rust, near-sdk 5). Rules live in `src/core.rs`, separate from blockchain glue, so every rule is unit-tested. |
-| `contracts/testusd` | testUSD: a NEP-141 test-dollar token with a faucet, so anyone can try Committee without buying anything. |
-| `scripts/` | Deploy and smoke-test scripts for testnet (PowerShell). |
+| `contracts/committee` | The Committee contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
+| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Committee for free. |
+| `web` | The app (Next.js). Committee page with the circle and the register, the Verify page, the no-wallet demo, create and profile pages. |
+| `scripts` | Testnet scripts (PowerShell): deploy, smoke test, DAO test, demo setup. |
 
 ## Run the tests
 
@@ -26,28 +60,39 @@ Committee runs the whole circle on NEAR:
 cargo test
 ```
 
-## Deploy to testnet
+34 tests cover full cycles, conservation of money (everything paid in comes back out), holdback and default cover, every payout mode, bad payments being refunded, and the DAO flow: factory call, forwarding, proposal then approval, failure and retry paths.
 
-Needs Rust with the `wasm32-unknown-unknown` target, `cargo-near`, `near-cli-rs`, and a testnet account with about 10 NEAR in your keychain.
+## Deploy your own (testnet)
+
+Needs Rust with `wasm32-unknown-unknown`, [`cargo-near`](https://github.com/near/cargo-near), [`near-cli-rs`](https://github.com/near/near-cli-rs), and a testnet account with about 20 NEAR.
 
 ```
-.\scripts\deploy.ps1 -Account your-name.testnet
-.\scripts\smoke-test.ps1 -Account your-name.testnet
+.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Committee
+.\scripts\dao-test.ps1 -Account your-name.testnet    # one round through a real Sputnik DAO
+.\scripts\setup-demo.ps1 -Account your-name.testnet  # demo members for the website
 ```
 
-## How payments work
+Then the web app:
 
-Members pay with `ft_transfer_call` on the token, sending a message to the Committee contract:
-
-```json
-{"action": "join", "committee_id": 1}
-{"action": "contribute", "committee_id": 1}
 ```
-
-A payment with the wrong amount, for the wrong committee, or twice in a round is refunded automatically.
+cd web
+cp .env.example .env.local   # set the contract names; setup-demo.ps1 adds DEMO_ACCOUNTS
+npm install
+npm run dev
+```
 
 ## Honest limits
 
-- Testnet only; testUSD is not real money.
-- Holdback and deposits reduce default risk; they don't remove it. A member who misses more than their holdback and deposit leaves a shortfall in that round's pot, which is recorded on-chain.
-- The lucky draw uses NEAR's built-in random seed: fair for a savings circle, but not casino-grade.
+- **Testnet only.** testUSD has no value. Mainnet would use a real stablecoin and need an audit.
+- **Holdback and deposits reduce default risk; they don't remove it.** Someone who misses more than their holdback and deposit leaves a shortfall in that round's pot. It's recorded on-chain and hits their reputation.
+- **The lucky draw uses NEAR's block random seed.** That's fair for a savings circle, but a block producer could in theory influence it. It's not casino-grade randomness.
+- **A DAO costs 6 NEAR** of storage (the Sputnik factory's price). Without the deposit, a committee is held by the contract itself, which is useful for quick tests.
+- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Committee and testUSD.
+
+## Roadmap
+
+- Pay in from any chain through NEAR Intents (1Click deposit addresses).
+- Reputation as a portable, non-transferable credential other apps can read.
+- A small insurance pool that covers defaults beyond holdback.
+- Urdu and Arabic interface; reminders before due dates.
+- A remittance link: family abroad pays a member's contribution directly.
