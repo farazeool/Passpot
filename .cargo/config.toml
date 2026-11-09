@@ -1,0 +1,4 @@
+# Windows: use the prebuilt NASM objects that ship with aws-lc-sys,
+# so tests build without installing NASM.
+[env]
+AWS_LC_SYS_PREBUILT_NASM = "1"
