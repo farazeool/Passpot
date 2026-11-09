@@ -9,7 +9,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$Account,
     [string]$UsdName = "usd",
-    [string]$AppName = "app"
+    [string]$AppName = "cmt",
+    [string]$DaoFactory = "sputnikv2.testnet"
 )
 
 # Call near.exe directly: the npm wrapper hides failures (always exits 0).
@@ -83,7 +84,7 @@ Step "Deploying Committee to $App"
 if (HasCode $App) {
     near contract deploy $App use-file $AppWasm without-init-call network-config testnet sign-with-keychain send
 } else {
-    $init = B64 ('{"owner":"' + $Account + '","token":"' + $Usd + '"}')
+    $init = B64 ('{"owner":"' + $Account + '","token":"' + $Usd + '","dao_factory":"' + $DaoFactory + '"}')
     near contract deploy $App use-file $AppWasm with-init-call new base64-args $init prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send
 }
 Check $LASTEXITCODE "Deploying Committee"
@@ -96,4 +97,4 @@ Check $LASTEXITCODE "Registering Committee on testUSD"
 Step "Done"
 Write-Host "testUSD:   $Usd"
 Write-Host "Committee: $App"
-Write-Host "Next: .\scripts\smoke-test.ps1 -Account $Account"
+Write-Host "Next: .\scripts\dao-test.ps1 -Account $Account"

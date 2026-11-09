@@ -66,6 +66,10 @@ pub enum EventKind {
     Payout,
     Claimed,
     Finished,
+    /// The committee's Sputnik DAO is live.
+    DaoReady,
+    /// A payout went to the DAO as a proposal (note holds the proposal id).
+    DaoProposal,
 }
 
 #[near(serializers = [borsh, json])]
@@ -88,6 +92,10 @@ pub struct Committee {
     pub organizer: AccountId,
     /// Fungible token used for every payment.
     pub token: AccountId,
+    /// The Sputnik DAO that holds this committee's money, if it has one.
+    pub dao: Option<AccountId>,
+    /// False while the DAO is still being created; no money is accepted until then.
+    pub dao_ready: bool,
     /// Contribution per member per round.
     pub amount: U128,
     pub size: u32,
@@ -154,6 +162,8 @@ impl Committee {
             name,
             organizer,
             token,
+            dao: None,
+            dao_ready: false,
             amount: U128(amount),
             size,
             round_secs,
@@ -181,7 +191,7 @@ impl Committee {
         self
     }
 
-    fn push_event(
+    pub fn push_event(
         &mut self,
         round: u32,
         kind: EventKind,
@@ -211,8 +221,14 @@ impl Committee {
     }
 
     /// Join by paying the security deposit, which must equal one contribution.
+    /// Money can only come in once the committee's DAO (if any) exists.
+    pub fn accepts_funds(&self) -> bool {
+        self.dao.is_none() || self.dao_ready
+    }
+
     pub fn join(&mut self, account_id: AccountId, paid: u128, now_ms: u64) {
         assert_eq!(self.status, Status::Open, "This committee is no longer open");
+        assert!(self.accepts_funds(), "This committee's DAO is still being created");
         assert!(self.member_index(&account_id).is_none(), "Already a member");
         assert!((self.members.len() as u32) < self.size, "This committee is full");
         assert_eq!(paid, self.amount.0, "The deposit must equal one contribution");
@@ -235,6 +251,7 @@ impl Committee {
         assert_eq!(caller, &self.organizer, "Only the organizer can start");
         assert_eq!(self.status, Status::Open, "Already started");
         assert_eq!(self.members.len() as u32, self.size, "Wait until every seat is taken");
+        assert!(self.accepts_funds(), "This committee's DAO is still being created");
         self.status = Status::Running;
         self.round = 1;
         self.round_started_ms = now_ms;
