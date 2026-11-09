@@ -8,7 +8,9 @@ param(
     [string]$AppName = "app"
 )
 
-$ErrorActionPreference = "Stop"
+# Call near.exe directly: the npm wrapper hides failures (always exits 0).
+$RealNear = Join-Path $env:APPDATA "npm\node_modules\near-cli-rs\node_modules\.bin_real\near.exe"
+if (Test-Path $RealNear) { Set-Alias near $RealNear -Scope Script }
 $Usd = "$UsdName.$Account"
 $App = "$AppName.$Account"
 $Members = @($Account, "bilal.$Account", "sara.$Account")
@@ -18,6 +20,10 @@ function B64([string]$json) { [Convert]::ToBase64String([Text.Encoding]::UTF8.Ge
 function Step([string]$text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
 function Call($contract, $method, $json, $signer, $deposit = '0 NEAR') {
     near contract call-function as-transaction $contract $method base64-args (B64 $json) prepaid-gas '100.0 Tgas' attached-deposit $deposit sign-as $signer network-config testnet sign-with-keychain send
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`nSTOPPED: $method by $signer failed. Send the error above to Claude." -ForegroundColor Red
+        exit 1
+    }
 }
 function View($contract, $method, $json) {
     near contract call-function as-read-only $contract $method base64-args (B64 $json) network-config testnet now
@@ -25,8 +31,10 @@ function View($contract, $method, $json) {
 
 Step "Creating helper members (skipped if they exist)"
 foreach ($m in $Members[1..2]) {
-    try { near account create-account fund-myself $m '1 NEAR' autogenerate-new-keypair save-to-keychain sign-as $Account network-config testnet sign-with-keychain send }
-    catch { Write-Host "$m probably exists already, continuing" }
+    near account view-account-summary $m network-config testnet now *> $null
+    if ($LASTEXITCODE -eq 0) { Write-Host "$m already exists, reusing it"; continue }
+    Write-Host "Creating $m. If asked for a signature scheme, press Enter."
+    near account create-account fund-myself $m '1 NEAR' autogenerate-new-keypair save-to-keychain sign-as $Account network-config testnet sign-with-keychain send
 }
 
 Step "Getting test dollars"

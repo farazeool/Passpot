@@ -12,6 +12,10 @@ param(
     [string]$AppName = "app"
 )
 
+# Call near.exe directly: the npm wrapper hides failures (always exits 0).
+$RealNear = Join-Path $env:APPDATA "npm\node_modules\near-cli-rs\node_modules\.bin_real\near.exe"
+if (Test-Path $RealNear) { Set-Alias near $RealNear -Scope Script }
+
 $Usd = "$UsdName.$Account"
 $App = "$AppName.$Account"
 
@@ -33,16 +37,28 @@ function HasCode([string]$acc) {
     $out = near account view-account-summary $acc network-config testnet now 2>&1 | Out-String
     return ($out -notmatch "No contract code")
 }
+function Verify([string]$acc) {
+    if (-not (HasCode $acc)) {
+        Write-Host "`nSTOPPED: $acc still has no contract code. Send the output above to Claude." -ForegroundColor Red
+        exit 1
+    }
+}
 
 Step "Building contracts (no ABI: the ABI step doesn't link on Windows)"
 Push-Location contracts/testusd;   cargo near build non-reproducible-wasm --no-abi; $code = $LASTEXITCODE; Pop-Location
 Check $code "Building testUSD"
 Push-Location contracts/committee; cargo near build non-reproducible-wasm --no-abi; $code = $LASTEXITCODE; Pop-Location
 Check $code "Building Committee"
-$UsdWasm = "target/near/testusd/testusd.wasm"
-$AppWasm = "target/near/committee/committee.wasm"
-Write-Host ("testUSD wasm:   {0:N0} KB" -f ((Get-Item $UsdWasm).Length / 1KB))
-Write-Host ("Committee wasm: {0:N0} KB" -f ((Get-Item $AppWasm).Length / 1KB))
+function FindWasm([string]$name) {
+    $f = Get-ChildItem -Path target -Recurse -Filter "$name.wasm" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match "\\near\\" } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if (-not $f) { Write-Host "STOPPED: built $name.wasm not found under target\near" -ForegroundColor Red; exit 1 }
+    return $f.FullName
+}
+$UsdWasm = FindWasm "testusd"
+$AppWasm = FindWasm "committee"
+Write-Host ("testUSD wasm:   $UsdWasm ({0:N0} KB)" -f ((Get-Item $UsdWasm).Length / 1KB))
+Write-Host ("Committee wasm: $AppWasm ({0:N0} KB)" -f ((Get-Item $AppWasm).Length / 1KB))
 
 foreach ($sub in @($Usd, $App)) {
     if (Exists $sub) {
@@ -61,6 +77,7 @@ if (HasCode $Usd) {
     near contract deploy $Usd use-file $UsdWasm with-init-call new base64-args (B64 '{}') prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send
 }
 Check $LASTEXITCODE "Deploying testUSD"
+Verify $Usd
 
 Step "Deploying Committee to $App"
 if (HasCode $App) {
@@ -70,6 +87,7 @@ if (HasCode $App) {
     near contract deploy $App use-file $AppWasm with-init-call new base64-args $init prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send
 }
 Check $LASTEXITCODE "Deploying Committee"
+Verify $App
 
 Step "Registering $App on testUSD"
 near contract call-function as-transaction $Usd register base64-args (B64 ('{"account_id":"' + $App + '"}')) prepaid-gas '30.0 Tgas' attached-deposit '0 NEAR' sign-as $Account network-config testnet sign-with-keychain send
