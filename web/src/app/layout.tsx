@@ -22,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Header />
           </Suspense>
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-rule mt-24">
+          <footer className="border-t border-rule mt-24 print:hidden">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-muted flex flex-wrap gap-x-6 gap-y-2">
               <span>Rota runs on NEAR testnet. Test dollars have no value.</span>
               {process.env.NEXT_PUBLIC_REPO_URL && (

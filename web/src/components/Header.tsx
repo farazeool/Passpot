@@ -53,7 +53,7 @@ export function Header() {
   ];
 
   return (
-    <header className="border-b border-rule bg-paper/90 backdrop-blur sticky top-0 z-30">
+    <header className="border-b border-rule bg-paper/90 backdrop-blur sticky top-0 z-30 print:hidden">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Rota home">
           <Mark size={28} />

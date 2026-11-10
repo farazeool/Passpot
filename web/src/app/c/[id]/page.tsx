@@ -8,6 +8,7 @@ import { Actions } from "@/components/Actions";
 import { Activity } from "@/components/Activity";
 import { Circle } from "@/components/Circle";
 import { SoundToggle } from "@/components/SoundToggle";
+import { Invite, Remind } from "@/components/Share";
 import { Register } from "@/components/Register";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
@@ -152,6 +153,9 @@ function CommitteePageInner() {
             </h2>
             <Actions circle={c} actor={actor} onDone={load} onSignIn={signIn} now={now} />
           </section>
+
+          {c.status === "Open" && c.members.length < c.size && <Invite circle={c} />}
+          {c.status === "Running" && <Remind circle={c} now={now} />}
 
           {latestPayout && (
             <section aria-labelledby="latest" className="rounded-2xl bg-marigold-wash border border-marigold/40 p-5 sm:p-6">

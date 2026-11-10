@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { displayName, money } from "@/lib/format";
 import { register, type Cell } from "@/lib/ledger";
@@ -46,7 +47,13 @@ export function Register({ circle: c }: { circle: Committee }) {
             return (
               <tr key={row.accountId} className="border-t border-rule">
                 <th scope="row" className="text-left font-semibold py-2.5 pl-4 sm:pl-0 pr-3 whitespace-nowrap">
-                  {displayName(row.accountId)}
+                  <Link
+                    href={`/c/${c.id}/statement/${encodeURIComponent(row.accountId)}`}
+                    className="hover:underline underline-offset-4"
+                    title={`${displayName(row.accountId)}'s statement`}
+                  >
+                    {displayName(row.accountId)}
+                  </Link>
                   {m.account_id === c.organizer && <span className="ml-1.5 text-xs font-normal text-muted">organizer</span>}
                 </th>
                 {row.cells.map((cell, i) => {
@@ -77,7 +84,7 @@ export function Register({ circle: c }: { circle: Committee }) {
       </table>
       <p className="mt-3 px-4 sm:px-0 text-xs text-muted">
         Amounts in {TOKEN_SYMBOL}. A marigold ring marks the round a member received the pot. Locked is the
-        member&apos;s deposit plus holdback, returned when the circle ends.
+        member&apos;s deposit plus holdback, returned when the circle ends. Tap a name for that member's printable statement.
       </p>
     </div>
   );

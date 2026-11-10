@@ -171,3 +171,10 @@ a.link:hover {
     transition-duration: 0.001ms !important;
   }
 }
+
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+}

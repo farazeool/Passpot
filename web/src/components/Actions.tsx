@@ -182,6 +182,17 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
 
   if (items.length === 0) items.push(<p key="none">Nothing for you to do right now.</p>);
 
+  if (me) {
+    items.push(
+      <p key="statement" className="text-sm">
+        <a className="link" href={`/c/${c.id}/statement/${encodeURIComponent(me.account_id)}`}>
+          {who ? `${who}'s` : "Your"} statement
+        </a>
+        : every payment in and out, ready to print or save as PDF.
+      </p>,
+    );
+  }
+
   return (
     <div className="space-y-4">
       {items}
