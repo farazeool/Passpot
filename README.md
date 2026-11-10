@@ -97,8 +97,11 @@ Every circle page also has: an **Invite on WhatsApp** link while seats are open,
 
 ## Roadmap
 
+- Private circles: people request to join, and the organizer approves them by their profile and on-chain savings record.
+- Swap turns: two members of an agreed-order circle trade payout rounds when both approve.
+- Pay ahead: cover two or three rounds in advance, for irregular incomes and travel.
 - Pay in from any chain through NEAR Intents (1Click deposit addresses).
 - Reputation as a portable, non-transferable credential other apps can read.
 - A small insurance pool that covers defaults beyond holdback.
-- Urdu and Arabic interface; reminders before due dates.
+- Urdu and Arabic interface; WhatsApp reminders before due dates.
 - A remittance link: family abroad pays a member's contribution directly.
