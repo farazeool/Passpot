@@ -1,32 +1,9 @@
 // Signs transactions for the ready-made demo members, so anyone can try
 // Rota without a wallet. Testnet only: the demo accounts hold nothing but
-// test dollars and a little test NEAR for fees. Only Rota and testUSD
-// calls are allowed, and only the ones the app itself makes.
-import { Account, JsonRpcProvider, KeyPairSigner, type KeyPairString } from "near-api-js";
-import { CONTRACT, DAO_DEPOSIT_NEAR, RPC_URLS, TOKEN } from "@/lib/config";
-import { readOutcome } from "@/lib/outcome";
-
-interface DemoAccount {
-  id: string;
-  key: KeyPairString;
-}
-
-function demoAccounts(): DemoAccount[] {
-  try {
-    const parsed = JSON.parse(process.env.DEMO_ACCOUNTS ?? "[]");
-    return Array.isArray(parsed) ? parsed.filter((a) => a && a.id && a.key) : [];
-  } catch {
-    return [];
-  }
-}
-
-// A single provider, so contract errors come back as they are (a failover
-// provider reports any failure as "exceeded providers"). The second URL is
-// used only when the first can't be reached.
-let rpcIndex = 0;
-const provider = () => new JsonRpcProvider({ url: RPC_URLS[rpcIndex % RPC_URLS.length] });
-const isNetworkError = (e: unknown) =>
-  /fetch failed|ECONN|ETIMEDOUT|ENOTFOUND|socket|429|502|503|504/i.test(e instanceof Error ? e.message : String(e));
+// test dollars and a little test NEAR for fees. Only Rota and testUSD calls
+// are allowed, and only the ones the app itself makes.
+import { CONTRACT, DAO_DEPOSIT_NEAR, TOKEN } from "@/lib/config";
+import { demoAccounts, nearBalance, signAndSend } from "@/lib/server/signer";
 
 const NEAR = 10n ** 24n;
 const DAO_DEPOSIT = BigInt(DAO_DEPOSIT_NEAR) * NEAR;
@@ -34,12 +11,6 @@ const DAO_DEPOSIT = BigInt(DAO_DEPOSIT_NEAR) * NEAR;
 const DAO_RESERVE = DAO_DEPOSIT + (15n * NEAR) / 10n;
 const DAO_COOLDOWN_MS = 60_000;
 let lastDaoCreated = 0;
-
-async function nearBalance(accountId: string): Promise<bigint> {
-  const p = provider();
-  const view = await p.viewAccount({ accountId });
-  return BigInt(view.amount);
-}
 
 async function daoAvailable(organizer: string | undefined): Promise<boolean> {
   if (!organizer) return false;
@@ -79,7 +50,14 @@ export async function POST(req: Request) {
   const accounts = demoAccounts();
   if (accounts.length < 3) return reject("The demo isn't set up on this deployment.", 503);
 
-  let body: { as?: string; receiverId?: string; methodName?: string; args?: Record<string, unknown>; deposit?: string; gasTgas?: number };
+  let body: {
+    as?: string;
+    receiverId?: string;
+    methodName?: string;
+    args?: Record<string, unknown>;
+    deposit?: string;
+    gasTgas?: number;
+  };
   try {
     body = await req.json();
   } catch {
@@ -116,27 +94,11 @@ export async function POST(req: Request) {
     return reject("Demo members can only use Rota and testUSD.");
   }
 
-  for (let attempt = 0; attempt < RPC_URLS.length; attempt++) {
-    try {
-      const account = new Account(signer.id, provider(), KeyPairSigner.fromSecretKey(signer.key));
-      const outcome = await account.callFunctionRaw({
-        contractId: receiverId,
-        methodName,
-        args,
-        deposit,
-        gas: BigInt(gasTgas) * 1_000_000_000_000n,
-        waitUntil: "EXECUTED_OPTIMISTIC",
-      });
-      return Response.json(readOutcome(outcome));
-    } catch (e) {
-      if (isNetworkError(e) && attempt + 1 < RPC_URLS.length) {
-        rpcIndex++;
-        continue;
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      console.error("demo call failed", methodName, message);
-      return reject(message, 422);
-    }
+  try {
+    return Response.json(await signAndSend(signer, receiverId, methodName, args, gasTgas, deposit));
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error("demo call failed", methodName, message);
+    return reject(message, 422);
   }
-  return reject("NEAR RPC is unreachable right now. Try again in a moment.", 503);
 }

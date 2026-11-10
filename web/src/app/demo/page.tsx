@@ -7,7 +7,8 @@ import * as act from "@/lib/actions";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { demoActor, getDemoInfo, rememberDemoCommittee, type DemoInfo } from "@/lib/demo";
 import { displayName, toBase } from "@/lib/format";
-import { getCommittee, getTokenBalance } from "@/lib/near";
+import { getCommittee, getCommitteesFor, getTokenBalance } from "@/lib/near";
+import { LIVE_DEMO_PREFIX } from "@/lib/config";
 
 type StepState = "waiting" | "running" | "done" | "failed";
 interface Step {
@@ -25,12 +26,29 @@ export default function DemoPage() {
   const [withDao, setWithDao] = useState(true);
   const [running, setRunning] = useState(false);
 
+  const [looking, setLooking] = useState(true);
+
+  // Instant demo: go straight to the live circle the agent keeps on round 2.
   useEffect(() => {
-    getDemoInfo().then((i) => {
+    const fresh = new URLSearchParams(window.location.search).has("fresh");
+    getDemoInfo().then(async (i) => {
       setInfo(i);
       setWithDao(i.daoAvailable);
+      if (!fresh && i.enabled && i.organizer) {
+        try {
+          const mine = await getCommitteesFor(i.organizer);
+          const live = mine
+            .filter((c) => c.name.startsWith(LIVE_DEMO_PREFIX) && c.status === "Running" && c.round >= 2)
+            .sort((a, b) => b.id - a.id)[0];
+          if (live) {
+            router.replace(`/c/${live.id}`);
+            return;
+          }
+        } catch {}
+      }
+      setLooking(false);
     });
-  }, []);
+  }, [router]);
 
   async function begin() {
     if (!info?.enabled || !info.organizer) return;
@@ -114,7 +132,9 @@ export default function DemoPage() {
         </p>
       )}
 
-      {info?.enabled && steps.length === 0 && (
+      {looking && info?.enabled !== false && <p className="mt-8 text-muted">Finding the live demo circle…</p>}
+
+      {!looking && info?.enabled && steps.length === 0 && (
         <div className="mt-8 space-y-5">
           <label className="flex gap-3 items-start rounded-2xl bg-sheet border border-rule p-4 cursor-pointer">
             <input

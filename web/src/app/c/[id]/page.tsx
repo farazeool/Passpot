@@ -119,6 +119,10 @@ function CommitteePageInner() {
         <section className="mt-8 rounded-2xl border border-ink/15 bg-sheet p-4 sm:p-5" aria-label="Demo members">
           <p className="text-sm text-muted mb-3">
             Demo circle. Act as any member — every action is a real NEAR testnet transaction, signed for you.
+            Other visitors may be playing too.{" "}
+            <Link href="/demo?fresh=1" className="link">
+              Start a fresh demo circle
+            </Link>
           </p>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Act as">
             {demo.members.map((m) => (

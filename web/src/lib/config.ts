@@ -18,3 +18,6 @@ export const explorerTx = (hash: string) => `${EXPLORER}/txns/${hash}`;
 
 /** Gas in yocto-gas units. */
 export const TGAS = 1_000_000_000_000n;
+
+/** Names of the always-running demo circles the agent keeps on round 2. */
+export const LIVE_DEMO_PREFIX = "Live demo:";
