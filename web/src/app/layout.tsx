@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   Source code
                 </a>
               )}
-              <span>Built at NEAR HACKATHON</span>
+              <span>Built for the NEAR Hackathon</span>
             </div>
           </footer>
           </ToastProvider>

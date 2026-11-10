@@ -397,7 +397,7 @@ export default function Home() {
         <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] items-start">
           <div className="lg:sticky lg:top-24">
             <h2 id="faq-title" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
-              FAQ <span className="text-muted font-medium text-xl sm:text-2xl tracking-normal">(Frequently asked questions)</span>
+              FAQ <span className="text-muted font-medium text-lg sm:text-xl tracking-normal whitespace-nowrap">(Frequently asked questions)</span>
             </h2>
             <p className="mt-4 text-lg text-text">The things people ask before they join their first circle.</p>
           </div>
