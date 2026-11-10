@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import "@fontsource-variable/familjen-grotesk";
-import "@fontsource-variable/public-sans";
+import "@fontsource-variable/inter";
 import "@near-wallet-selector/modal-ui/styles.css";
 import "./globals.css";
 import { Header } from "@/components/Header";
@@ -20,8 +19,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className="antialiased" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#10142a" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
       </head>
       <body className="min-h-dvh flex flex-col">
         <WalletProvider>

@@ -98,7 +98,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-rule bg-sheet">
+      <section className="border-y border-rule bg-band-soft">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
           <h2 className="font-display text-3xl sm:text-4xl font-semibold text-ink max-w-2xl">How a round works</h2>
           <ol className="mt-10 grid gap-10 md:grid-cols-3">

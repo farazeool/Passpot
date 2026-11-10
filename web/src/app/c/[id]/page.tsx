@@ -9,6 +9,7 @@ import { Activity } from "@/components/Activity";
 import { Circle } from "@/components/Circle";
 import { SoundToggle } from "@/components/SoundToggle";
 import { Copy } from "@/components/Copy";
+import { Tour, tourDone, type TourStep } from "@/components/Tour";
 import { useTitle } from "@/lib/useTitle";
 import { Invite, Remind } from "@/components/Share";
 import { Register } from "@/components/Register";
@@ -36,6 +37,7 @@ function CommitteePageInner() {
   const [persona, setPersona] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState<{ accountId: string; key: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const [touring, setTouring] = useState(false);
   const lastPayouts = useRef<number | null>(null);
 
   const load = useCallback(async () => {
@@ -77,6 +79,13 @@ function CommitteePageInner() {
 
   useTitle(c ? circleName(c.name) : c === null ? "Circle not found" : null);
 
+  // First visit to a demo circle: a short guided tour.
+  useEffect(() => {
+    if (!isDemo || tourDone()) return;
+    const t = window.setTimeout(() => setTouring(true), 900);
+    return () => window.clearTimeout(t);
+  }, [isDemo]);
+
   const actor: Actor | null = isDemo && persona ? demoActor(persona) : walletActor;
 
   if (c === undefined) {
@@ -98,6 +107,34 @@ function CommitteePageInner() {
   const shareText = latestPayout
     ? `${circleName(c.name)}: ${displayName(latestPayout.account_id!)} received the round ${latestPayout.round} pot (${money(latestPayout.amount)} ${TOKEN_SYMBOL}, ${howChosen(latestPayout.note)}). Check it yourself: ${typeof window !== "undefined" ? window.location.href : ""}`
     : "";
+
+  const tourSteps: TourStep[] = [
+    {
+      target: "tour-circle",
+      title: "This is the circle",
+      body: "Each person is a member. The pot in the middle is what one of them takes home this round. A green tick means they've paid; a gold coin shows who has already had the pot.",
+    },
+    {
+      target: "tour-members",
+      title: "You play every member",
+      body: "Pick who you are: Ayesha, Bilal or Sara. Switch any time to see the circle from their side.",
+    },
+    {
+      target: "tour-actions",
+      title: "Do what they can do",
+      body: "Pay this round, or close the round once everyone has paid. Closing runs an on-chain lucky draw and the pot goes to the winner. Each tap is a real NEAR transaction.",
+    },
+    {
+      target: "tour-register",
+      title: "The register",
+      body: "Who paid in each round, who received the pot, and what's still locked as each member's safety deposit. Tap a name for their statement.",
+    },
+    {
+      target: "tour-verify",
+      title: "Don't trust us. Check.",
+      body: "Verify re-checks the vault, every payout and every draw straight from the chain, in your own browser.",
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
@@ -121,21 +158,26 @@ function CommitteePageInner() {
         </div>
         <div className="flex gap-2">
           <SoundToggle />
-          <Link href={`/c/${c.id}/verify`} className="btn btn-quiet">
+          <Link id="tour-verify" href={`/c/${c.id}/verify`} className="btn btn-quiet">
             Verify on-chain
           </Link>
         </div>
       </div>
 
       {isDemo && demo && (
-        <section className="mt-8 rounded-2xl border border-ink/15 bg-sheet p-4 sm:p-5" aria-label="Demo members">
-          <p className="text-sm text-muted mb-3">
-            Demo circle. Act as any member — every action is a real NEAR testnet transaction, signed for you.
-            Other visitors may be playing too.{" "}
-            <Link href="/demo?fresh=1" className="link">
-              Start a fresh demo circle
-            </Link>
-          </p>
+        <section id="tour-members" className="mt-8 card p-4 sm:p-5" aria-label="Demo members">
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 mb-3">
+            <p className="text-sm text-muted max-w-2xl">
+              Demo circle. Act as any member — every action is a real NEAR testnet transaction, signed for you.
+              Other visitors may be playing too.{" "}
+              <Link href="/demo?fresh=1" className="link">
+                Start a fresh demo circle
+              </Link>
+            </p>
+            <button className="btn btn-ghost btn-sm -my-1" onClick={() => setTouring(true)}>
+              How it works
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Act as">
             {demo.members.map((m) => (
               <button
@@ -153,12 +195,12 @@ function CommitteePageInner() {
       )}
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,520px)_1fr] items-start">
-        <div className="lg:sticky lg:top-24">
+        <div id="tour-circle" className="lg:sticky lg:top-24 rounded-[1.25rem]">
           <Circle circle={c} celebrate={celebrate} sound />
         </div>
 
         <div className="space-y-10 min-w-0">
-          <section aria-labelledby="todo" className="card p-5 sm:p-6">
+          <section id="tour-actions" aria-labelledby="todo" className="card p-5 sm:p-6">
             <h2 id="todo" className="font-display text-xl font-semibold text-ink mb-3">
               {actor ? `What ${isDemo ? displayName(actor.accountId) : "you"} can do` : "Take part"}
             </h2>
@@ -191,7 +233,7 @@ function CommitteePageInner() {
             </section>
           )}
 
-          <section aria-labelledby="register">
+          <section id="tour-register" aria-labelledby="register">
             <h2 id="register" className="font-display text-2xl font-semibold text-ink mb-4">
               Register
             </h2>
@@ -228,6 +270,7 @@ function CommitteePageInner() {
           </section>
         </div>
       </div>
+      <Tour steps={tourSteps} open={touring} onClose={() => setTouring(false)} />
     </div>
   );
 }

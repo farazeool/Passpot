@@ -6,61 +6,65 @@
    Light: ink-blue on cool paper. Dark: the same register by lamplight, deep indigo
    with warm marigold. One accent everywhere: marigold, for the pot and whose turn it is. */
 :root {
-  --font-public-sans: "Public Sans Variable";
-  --font-familjen: "Familjen Grotesk Variable";
+  --font-public-sans: "Inter Variable";
+  --font-familjen: "Inter Variable";
   color-scheme: light;
 
-  --paper: #f5f6f2;
+  /* Light: white page, black text. */
+  --paper: #ffffff;
   --sheet: #ffffff;
   --sheet-raised: #ffffff;
-  --ink: #22306b;
-  --ink-soft: #4a5687;
-  --text: #1b1f2e;
-  --muted: #5d6273;
-  --rule: #dfe2e8;
-  --rule-strong: #c4c8d2;
+  --band-soft: #f5f5f7;
+  --ink: #000000;
+  --ink-soft: #3a3a3c;
+  --text: #111111;
+  --muted: #6e6e73;
+  --rule: #e8e8ed;
+  --rule-strong: #d2d2d7;
   --marigold: #e3a21a;
   --marigold-strong: #d4940d;
-  --marigold-wash: #fbf0d6;
-  --paid: #2e7d5b;
-  --paid-wash: #e3f1ea;
-  --missed: #b8432f;
-  --missed-wash: #f7e4df;
-  --primary-bg: #22306b;
-  --primary-bg-hover: #18225a;
+  --marigold-wash: #fdf4e1;
+  --paid: #1f8a5b;
+  --paid-wash: #e6f4ec;
+  --missed: #c2412d;
+  --missed-wash: #fbe9e5;
+  --primary-bg: #000000;
+  --primary-bg-hover: #2c2c2e;
   --primary-fg: #ffffff;
-  --band: #22306b;
-  --band-fg: #ffffff;
-  --shadow: 0 1px 2px rgb(27 31 46 / 0.04), 0 4px 16px rgb(27 31 46 / 0.04);
-  --shadow-lift: 0 2px 4px rgb(27 31 46 / 0.06), 0 10px 28px rgb(27 31 46 / 0.08);
+  --band: #000000;
+  --band-fg: #f5f5f7;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 18px rgb(0 0 0 / 0.05);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.06), 0 14px 34px rgb(0 0 0 / 0.1);
   --selection: #fbe3a8;
 }
 
+/* Dark: true black page, white text. */
 [data-theme="dark"] {
   color-scheme: dark;
-  --paper: #10142a;
-  --sheet: #171c36;
-  --sheet-raised: #1d2342;
-  --ink: #d7ddff;
-  --ink-soft: #a9b3e6;
-  --text: #e6e8f2;
-  --muted: #9aa1bd;
-  --rule: #262c4c;
-  --rule-strong: #384066;
+  --paper: #000000;
+  --sheet: #111113;
+  --sheet-raised: #1c1c1e;
+  --band-soft: #0b0b0c;
+  --ink: #ffffff;
+  --ink-soft: #d1d1d6;
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --rule: #232326;
+  --rule-strong: #38383c;
   --marigold: #f0b23a;
   --marigold-strong: #f5c25e;
-  --marigold-wash: #33290f;
-  --paid: #63c497;
-  --paid-wash: #15352a;
-  --missed: #ef8a72;
-  --missed-wash: #3d211c;
-  --primary-bg: #d7ddff;
-  --primary-bg-hover: #ffffff;
-  --primary-fg: #10142a;
-  --band: #1d2342;
-  --band-fg: #e6e8f2;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 4px 16px rgb(0 0 0 / 0.2);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.35);
+  --marigold-wash: #2a2008;
+  --paid: #4cc38a;
+  --paid-wash: #0f2a1d;
+  --missed: #ff7a63;
+  --missed-wash: #33140f;
+  --primary-bg: #ffffff;
+  --primary-bg-hover: #e5e5ea;
+  --primary-fg: #000000;
+  --band: #111113;
+  --band-fg: #f5f5f7;
+  --shadow: 0 0 0 1px rgb(255 255 255 / 0.02), 0 4px 18px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 0 0 1px rgb(255 255 255 / 0.04), 0 14px 34px rgb(0 0 0 / 0.6);
   --selection: #5a4614;
 }
 
@@ -81,6 +85,7 @@
   --color-missed-wash: var(--missed-wash);
   --color-band: var(--band);
   --color-band-fg: var(--band-fg);
+  --color-band-soft: var(--band-soft);
   --font-sans: var(--font-public-sans);
   --font-display: var(--font-familjen);
 }
@@ -104,10 +109,13 @@ html.theme-switching * {
 }
 
 body {
-  font-family: var(--font-public-sans), system-ui, sans-serif;
-  font-size: 16.5px;
-  line-height: 1.6;
-  font-feature-settings: "kern", "liga", "calt";
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.58;
+  letter-spacing: -0.011em;
+  font-feature-settings: "cv11", "ss01", "ss03", "calt";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--paper);
 }
 
@@ -129,13 +137,16 @@ dd {
 }
 
 .font-display {
-  font-family: var(--font-familjen), var(--font-public-sans), sans-serif;
-  letter-spacing: -0.022em;
-  font-feature-settings: "ss01", "kern";
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  font-feature-settings: "cv11", "ss01", "ss03", "calt";
 }
 
 h1.font-display {
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
 }
 
 .num {
@@ -167,7 +178,7 @@ h1.font-display {
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.925rem;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.012em;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;

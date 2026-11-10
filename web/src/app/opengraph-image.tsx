@@ -12,11 +12,11 @@ export default function OpengraphImage() {
   });
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: "#22306b", color: "#fff", padding: 72, alignItems: "center" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#000000", color: "#fff", padding: 72, alignItems: "center" }}>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, paddingRight: 40 }}>
           <div style={{ fontSize: 34, fontWeight: 700, color: "#f0b23a", marginBottom: 28 }}>Rota</div>
           <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.04, letterSpacing: -2 }}>The savings circle nobody can run off with.</div>
-          <div style={{ fontSize: 28, marginTop: 28, color: "#d9ddef", lineHeight: 1.35 }}>
+          <div style={{ fontSize: 28, marginTop: 28, color: "#a1a1a6", lineHeight: 1.35 }}>
             Committee, susu, tanda, chama, hui. On NEAR, with the pot in a DAO no one controls.
           </div>
         </div>
@@ -34,7 +34,7 @@ export default function OpengraphImage() {
                 height: 56,
                 borderRadius: 56,
                 background: s.pot ? "#e3a21a" : "#f5f6f2",
-                border: "4px solid #22306b",
+                border: "4px solid #000000",
               }}
             />
           ))}
