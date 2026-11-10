@@ -109,7 +109,7 @@ function CommitteePageInner() {
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">
             {circleName(c.name)}
             {isDemo && (
-              <span className="ml-3 align-middle inline-block rounded-full bg-marigold-wash border border-marigold/50 px-3 py-1 text-sm font-sans font-semibold text-ink">
+              <span className="ml-3 align-middle inline-block rounded-full bg-marigold-wash border border-marigold/50 px-3 py-1 text-sm font-sans font-semibold tracking-normal text-ink">
                 Live demo
               </span>
             )}

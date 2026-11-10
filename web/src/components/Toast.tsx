@@ -18,7 +18,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const show = useCallback((text: string, opts: { hash?: string; tone?: Toast["tone"] } = {}) => {
     const id = Date.now() + Math.random();
     setToasts((t) => [...t.slice(-2), { id, text, hash: opts.hash, tone: opts.tone ?? "good" }]);
-    window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 6000);
+    window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 8000);
   }, []);
   return (
     <ToastContext.Provider value={show}>
