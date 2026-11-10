@@ -327,6 +327,52 @@ a.link:hover {
   animation: toast-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Cards that tilt toward the pointer */
+.tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 260ms ease;
+  will-change: transform;
+  --glare: 0;
+}
+.tilt:hover {
+  box-shadow: var(--shadow-lift);
+}
+.tilt-glare {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: var(--glare);
+  transition: opacity 260ms ease;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.18), transparent 55%);
+  mix-blend-mode: soft-light;
+}
+[data-theme="dark"] .tilt-glare {
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.09), transparent 55%);
+  mix-blend-mode: normal;
+}
+
+/* FAQ */
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq .faq-icon {
+  transition: transform 220ms ease;
+}
+.faq[open] .faq-icon {
+  transform: rotate(45deg);
+}
+.faq[open] .faq-body {
+  animation: rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 /* Landing page motion */
 @keyframes rise {
   from {

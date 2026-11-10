@@ -54,6 +54,7 @@ export function Header() {
   const nav = [
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
+    { href: "/#faq", label: "Questions" },
   ];
 
   return (

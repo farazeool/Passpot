@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Circle } from "@/components/Circle";
+import { Tilt } from "@/components/Tilt";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { getCommittees } from "@/lib/near";
 import type { Committee, Member } from "@/lib/types";
@@ -89,6 +90,41 @@ function CountUp({ to, format = (n: number) => n.toLocaleString("en-US") }: { to
   }, [to]);
   return <>{format(v)}</>;
 }
+
+const FAQ: [string, string][] = [
+  [
+    "What is a savings circle?",
+    "A group of people who each pay the same amount every month. Each month one of them takes the whole pot, until everyone has had a turn. Nobody pays interest, and nobody needs a bank. It's called a committee, susu, tanda, chama or hui, depending on where you're from.",
+  ],
+  [
+    "Can the organizer run off with the money?",
+    "No. The money never sits with a person. Each circle has its own Sputnik DAO vault on NEAR, and money only leaves it to the member the rules pick. The organizer has no more power over the money than anyone else.",
+  ],
+  [
+    "What if someone stops paying?",
+    "Every member locks a deposit when they join, and members who get the pot early have part of it held back. A missed payment is covered from those, so the rest of the circle still gets paid in full. The miss is also recorded on that member's savings record.",
+  ],
+  [
+    "How is the lucky draw fair?",
+    "The winner is picked by the contract from NEAR's on-chain randomness, among members who haven't had the pot yet. Nobody, including us, can choose the result. Every circle's Verify page re-runs each draw in your browser so you can check it yourself.",
+  ],
+  [
+    "Do I need crypto to try it?",
+    "No. The demo circle needs no wallet: you act as three ready-made members and every step is a real transaction on NEAR testnet. To start or join your own circle, you need a free NEAR testnet account.",
+  ],
+  [
+    "Is this real money?",
+    `Not yet. Rota runs on NEAR testnet with ${TOKEN_SYMBOL}, a test dollar with no value that you can get for free. The same contract can run with real stablecoins like USDC on NEAR mainnet.`,
+  ],
+  [
+    "Does Rota take a cut?",
+    "No. There's no fee in the contract. The only costs are NEAR's network fees, which are fractions of a cent, and a one-time storage deposit for the circle's DAO.",
+  ],
+  [
+    "Where is my profile kept?",
+    "On NEAR Social, the profile store NEAR apps share, under your own account. Your savings record is kept by the Rota contract. Neither sits on our servers, and nobody can edit your record.",
+  ],
+];
 
 export default function Home() {
   const [step, setStep] = useState(0);
@@ -213,7 +249,7 @@ export default function Home() {
           Circles run on trust. Until someone leaves with the money.
         </h2>
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-rule overflow-hidden" style={{ boxShadow: "var(--shadow)" }}>
+          <Tilt max={5} className="rounded-3xl border border-rule overflow-hidden" style={{ boxShadow: "var(--shadow)" }}>
             <div className="ruled h-full px-6 sm:px-8 pl-14 sm:pl-16 pt-8 pb-8 leading-[2rem]">
               <p className="text-xs font-semibold uppercase tracking-wider text-[#8a6d3b] leading-8">The old way</p>
               <p className="font-semibold text-lg">Khan family committee — 50 a month</p>
@@ -225,8 +261,8 @@ export default function Home() {
               </ul>
               <p className="mt-2 text-[#c2412d] font-semibold">The cash sits with one person, and the record is a notebook.</p>
             </div>
-          </div>
-          <div className="rounded-3xl bg-band text-band-fg p-6 sm:p-8">
+          </Tilt>
+          <Tilt max={5} className="rounded-3xl bg-band text-band-fg p-6 sm:p-8">
             <p className="text-xs font-semibold uppercase tracking-wider text-marigold">With Rota</p>
             <ul className="mt-4 space-y-4">
               {[
@@ -246,14 +282,14 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Tilt>
         </div>
       </section>
 
       <section className="border-y border-rule bg-band-soft">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
           <h2 className="font-display text-3xl sm:text-4xl font-semibold text-ink max-w-2xl">How a round works</h2>
-          <ol className="mt-10 grid gap-10 md:grid-cols-3">
+          <ol className="mt-10 grid gap-5 md:grid-cols-3">
             {[
               [
                 "Everyone pays in",
@@ -268,46 +304,66 @@ export default function Home() {
                 "An on-chain lucky draw, the agreed order, or the best discount bid picks who gets it. Nobody can rig it, and everyone can re-check it.",
               ],
             ].map(([title, text], i) => (
-              <li key={title} className="flex gap-4">
-                <span className="font-display text-4xl font-semibold text-marigold num leading-none" aria-hidden>
-                  {i + 1}
-                </span>
-                <div>
-                  <h3 className="font-display text-xl font-semibold text-ink">{title}</h3>
+              <li key={title}>
+                <Tilt className="card h-full p-6">
+                  <span className="font-display text-5xl font-semibold text-marigold num leading-none" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-4 font-display text-xl font-semibold text-ink">{title}</h3>
                   <p className="mt-2 text-text">{text}</p>
-                </div>
+                </Tilt>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20 grid gap-12 lg:grid-cols-2">
-        <div>
-          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-ink">
-            What happens when someone stops paying
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20" aria-labelledby="trust">
+        <div className="max-w-2xl">
+          <h2 id="trust" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
+            Pay on time, and Rota trusts you more.
           </h2>
           <p className="mt-4 text-lg text-text">
-            This is why circles usually only work between close family. Rota makes the early winner leave part
-            of the pot behind as cover.
+            When you get the pot before you&apos;ve finished paying in, part of it is held back as cover for the
+            payments you still owe. How much depends on your savings record, which lives on-chain and follows you
+            from circle to circle.
           </p>
         </div>
-        <div className="card p-6 space-y-4 text-text">
-          <p>
-            Bilal wins round 1 of a 3-person circle: a{" "}
-            <span className="num font-semibold">300 {TOKEN_SYMBOL}</span> pot. He&apos;s new, so{" "}
-            <span className="num font-semibold">150</span> is held back and{" "}
-            <span className="num font-semibold">150</span> reaches him straight away.
-          </p>
-          <p>
-            In round 2 he doesn&apos;t pay. When the round closes, <span className="num font-semibold">100</span> of
-            his holdback covers it. Sara still gets the full <span className="num font-semibold">300</span>.
-          </p>
-          <p>
-            Bilal&apos;s record now shows a missed payment, so his next circle holds back half again. Members who
-            finish cleanly get less held back — none after three circles.
-          </p>
-        </div>
+        <ol className="mt-10 grid gap-5 md:grid-cols-3">
+          {[
+            { who: "New member", held: 50, text: "Half of an early pot waits until your remaining payments are in. It comes back to you round by round as you pay." },
+            { who: "One clean circle", held: 25, text: "Finish a circle without missing a payment and only a quarter is held back next time." },
+            { who: "Three clean circles", held: 0, text: "You get the whole pot the moment it's yours. Your record is the guarantee." },
+          ].map((t, i) => (
+            <li key={t.who}>
+              <Tilt className="card h-full p-6 flex flex-col">
+                <p className="text-sm font-semibold text-muted">Level {i + 1}</p>
+                <h3 className="mt-1 font-display text-2xl font-semibold text-ink">{t.who}</h3>
+                <div className="mt-5" aria-label={`${t.held}% held back`}>
+                  <div className="flex h-3 rounded-full overflow-hidden bg-rule">
+                    <span className="bg-paid" style={{ width: `${100 - t.held}%` }} />
+                    <span className="bg-marigold" style={{ width: `${t.held}%` }} />
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm num">
+                    <span className="text-text">
+                      <strong className="text-ink">{100 - t.held}%</strong> paid to you now
+                    </span>
+                    {t.held > 0 && (
+                      <span className="text-text">
+                        <strong className="text-ink">{t.held}%</strong> held
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className="mt-4 text-text">{t.text}</p>
+              </Tilt>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-6 text-muted">
+          Miss a payment and the held money covers it, the circle carries on, and your next circle starts back at
+          level 1.
+        </p>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-8">
@@ -333,6 +389,30 @@ export default function Home() {
                 See circles and verify one
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 scroll-mt-24" aria-labelledby="faq-title">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] items-start">
+          <div className="lg:sticky lg:top-24">
+            <h2 id="faq-title" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
+              Questions
+            </h2>
+            <p className="mt-4 text-lg text-text">The things people ask before they join their first circle.</p>
+          </div>
+          <div className="border-t border-rule">
+            {FAQ.map(([q, a]) => (
+              <details key={q} className="faq border-b border-rule group">
+                <summary className="flex items-center justify-between gap-6 py-5 font-semibold text-ink text-lg">
+                  {q}
+                  <span aria-hidden className="faq-icon text-2xl font-normal text-muted leading-none">
+                    +
+                  </span>
+                </summary>
+                <p className="faq-body pb-5 -mt-1 text-text max-w-2xl">{a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
