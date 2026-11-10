@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { countdown, displayName, money } from "@/lib/format";
+import { countdown, money } from "@/lib/format";
+import { useName } from "@/lib/profile";
 import { playCoin, playWin } from "@/lib/sound";
 import type { Committee } from "@/lib/types";
 
@@ -300,7 +301,8 @@ function Seat({
 /** Names go on top of everything, with a paper halo so the mat never hides them. */
 function SeatLabel({ s }: { s: { x: number; y: number; member: Committee["members"][number] | undefined } }) {
   const m = s.member;
-  const label = m ? displayName(m.account_id) : "Open seat";
+  const named = useName(m?.account_id ?? "");
+  const label = m ? named.split(" ")[0] : "Open seat";
   const front = s.y >= CY;
   const side = Math.abs(s.x - CX) > SEAT_RX * 0.8;
   const right = s.x > CX;

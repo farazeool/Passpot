@@ -120,7 +120,7 @@ export default function DemoPage() {
       <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Try a circle in two minutes</h1>
       <p className="mt-4 text-lg text-text">
         Three ready-made members — {info ? info.members.map(displayName).join(", ") : "Ayesha, Bilal and Sara"} — will
-        set up a real circle on NEAR testnet. Then you play every one of them: pay in, skip a payment, run the draw.
+        set up a real circle on NEAR testnet. Then you act as each of them: pay in, miss a payment, close the round and see who gets the pot.
         No wallet needed.
       </p>
 

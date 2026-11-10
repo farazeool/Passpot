@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { explainError, faucet } from "@/lib/actions";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { money, shortName } from "@/lib/format";
+import { money } from "@/lib/format";
+import { nameOf, useProfile } from "@/lib/profile";
+import { Avatar } from "./Avatar";
 import { getTokenBalance } from "@/lib/near";
 import { useWallet } from "@/lib/wallet";
 import { Mark } from "./Mark";
@@ -17,6 +19,7 @@ export function Header() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const profile = useProfile(accountId);
 
   const refresh = useCallback(async () => {
     if (!accountId) return setBalance(null);
@@ -51,6 +54,7 @@ export function Header() {
   const nav = [
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
+    { href: "/profile", label: "Your profile", match: accountId ? `/u/${accountId}` : "/profile" },
   ];
 
   return (
@@ -66,7 +70,7 @@ export function Header() {
               key={n.href}
               href={n.href}
               className={`px-3 py-2 rounded-full text-sm font-medium ${
-                pathname?.startsWith(n.href) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
+                pathname?.startsWith(n.match ?? n.href) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
               }`}
             >
               {n.label}
@@ -77,14 +81,19 @@ export function Header() {
           <ThemeToggle />
           {accountId ? (
             <>
-              <div className="hidden sm:flex flex-col items-end leading-tight mr-1">
-                <Link href={`/u/${accountId}`} className="text-sm font-medium text-ink hover:underline">
-                  {shortName(accountId)}
-                </Link>
-                <span className="text-xs text-muted num">
-                  {balance === null ? "…" : `${money(balance)} ${TOKEN_SYMBOL}`}
+              <Link
+                href={`/u/${accountId}`}
+                className="flex items-center gap-2.5 rounded-full pl-1 pr-1 sm:pr-3 py-1 hover:bg-sheet border border-transparent hover:border-rule transition-colors"
+                title="Your profile"
+              >
+                <Avatar id={accountId} size={30} />
+                <span className="hidden sm:flex flex-col leading-tight">
+                  <span className="text-sm font-medium text-ink max-w-[10rem] truncate">{nameOf(accountId, profile)}</span>
+                  <span className="text-xs text-muted num">
+                    {balance === null ? "…" : `${money(balance)} ${TOKEN_SYMBOL}`}
+                  </span>
                 </span>
-              </div>
+              </Link>
               <button className="btn btn-quiet" onClick={getDollars} disabled={busy}>
                 {busy && <span className="spinner" aria-hidden />}
                 {busy ? "Adding" : "Get test dollars"}
@@ -107,6 +116,16 @@ export function Header() {
           </Link>
         ))}
       </nav>
+      {accountId && profile === null && !pathname?.startsWith("/u/") && (
+        <div className="border-t border-rule bg-marigold-wash">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink">
+            <span>Add your name so members know who you are.</span>
+            <Link href={`/u/${accountId}?edit=1`} className="font-semibold underline underline-offset-2">
+              Make your profile
+            </Link>
+          </div>
+        </div>
+      )}
       {note && (
         <div role="status" className="mx-auto max-w-6xl px-4 sm:px-6 pb-2 text-sm text-ink-soft">
           {note}

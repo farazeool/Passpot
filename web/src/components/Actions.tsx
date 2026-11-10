@@ -6,6 +6,7 @@ import * as act from "@/lib/actions";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { countdown, displayName, money } from "@/lib/format";
+import { Name } from "@/lib/profile";
 import type { Committee } from "@/lib/types";
 
 interface Props {
@@ -105,7 +106,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
           </div>,
         );
       } else {
-        items.push(<p key="wait-start">Every seat is taken. Waiting for {displayName(c.organizer)} to start.</p>);
+        items.push(<p key="wait-start">Every seat is taken. Waiting for <Name id={c.organizer} /> to start.</p>);
       }
     }
   } else if (c.status === "Running") {

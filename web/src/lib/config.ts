@@ -23,3 +23,6 @@ export const TGAS = 1_000_000_000_000n;
  *  prefix, and told apart from visitors' fresh demo circles by its day-long rounds. */
 export const LIVE_DEMO_PREFIX = "Live demo:";
 export const LIVE_DEMO_ROUND_SECS = 86_400;
+
+/** NEAR Social's data contract, where member profiles live. */
+export const SOCIAL_DB = process.env.NEXT_PUBLIC_SOCIAL_DB ?? (NETWORK === "mainnet" ? "social.near" : "v1.social08.testnet");

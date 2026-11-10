@@ -4,7 +4,8 @@ import { useTitle } from "@/lib/useTitle";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { displayName, duration, money, circleName } from "@/lib/format";
+import { duration, money, circleName } from "@/lib/format";
+import { Name } from "@/lib/profile";
 import { getCommittees } from "@/lib/near";
 import type { Committee } from "@/lib/types";
 import { useWallet } from "@/lib/wallet";
@@ -74,7 +75,7 @@ export default function CommitteesPage() {
               <span className="min-w-0">
                 <span className="font-display text-lg font-semibold text-ink block truncate">{circleName(c.name)}</span>
                 <span className="text-sm text-muted">
-                  #{c.id}, by {displayName(c.organizer)}
+                  #{c.id}, by <Name id={c.organizer} />
                   {c.dao ? ", with its own DAO vault" : ""}
                 </span>
               </span>

@@ -17,6 +17,7 @@ import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
 import { demoActor, getDemoInfo, type DemoInfo } from "@/lib/demo";
 import { displayName, duration, money, circleName } from "@/lib/format";
+import { Name } from "@/lib/profile";
 import { heldBack, howChosen } from "@/lib/ledger";
 import { getCommittee } from "@/lib/near";
 import type { Committee } from "@/lib/types";
@@ -105,7 +106,7 @@ function CommitteePageInner() {
 
   const latestPayout = [...c.events].reverse().find((e) => e.kind === "Payout");
   const shareText = latestPayout
-    ? `${circleName(c.name)}: ${displayName(latestPayout.account_id!)} received the round ${latestPayout.round} pot (${money(latestPayout.amount)} ${TOKEN_SYMBOL}, ${howChosen(latestPayout.note)}). Check it yourself: ${typeof window !== "undefined" ? window.location.href : ""}`
+    ? `${circleName(c.name)}: $<Name id={latestPayout.account_id!} /> received the round ${latestPayout.round} pot (${money(latestPayout.amount)} ${TOKEN_SYMBOL}, ${howChosen(latestPayout.note)}). Check it yourself: ${typeof window !== "undefined" ? window.location.href : ""}`
     : "";
 
   const tourSteps: TourStep[] = [
@@ -116,12 +117,12 @@ function CommitteePageInner() {
     },
     {
       target: "tour-members",
-      title: "You play every member",
-      body: "Pick who you are: Ayesha, Bilal or Sara. Switch any time to see the circle from their side.",
+      title: "Act as any member",
+      body: "Three real testnet accounts are in this circle: Ayesha, Bilal and Sara. Pick one to act as them, and switch any time to see the circle from their side.",
     },
     {
       target: "tour-actions",
-      title: "Do what they can do",
+      title: "Pay in, or close the round",
       body: "Pay this round, or close the round once everyone has paid. Closing runs an on-chain lucky draw and the pot goes to the winner. Each tap is a real NEAR transaction.",
     },
     {
@@ -141,7 +142,10 @@ function CommitteePageInner() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted">
-            Circle #{c.id}, organized by {displayName(c.organizer)}
+            Circle #{c.id}, organized by{" "}
+            <Link href={`/u/${c.organizer}`} className="link">
+              <Name id={c.organizer} />
+            </Link>
           </p>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">
             {circleName(c.name)}
@@ -169,7 +173,7 @@ function CommitteePageInner() {
           <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 mb-3">
             <p className="text-sm text-muted max-w-2xl">
               Demo circle. Act as any member — every action is a real NEAR testnet transaction, signed for you.
-              Other visitors may be playing too.{" "}
+              Other visitors may be using it too.{" "}
               <Link href="/demo?fresh=1" className="link">
                 Start a fresh demo circle
               </Link>
@@ -213,7 +217,7 @@ function CommitteePageInner() {
           {latestPayout && (
             <section aria-labelledby="latest" className="rounded-2xl bg-marigold-wash border border-marigold/40 p-5 sm:p-6">
               <h2 id="latest" className="font-display text-xl font-semibold text-ink">
-                {displayName(latestPayout.account_id!)} received the round {latestPayout.round} pot
+                <Name id={latestPayout.account_id!} /> received the round {latestPayout.round} pot
               </h2>
               <p className="mt-1 text-text">
                 Chosen by {howChosen(latestPayout.note)}.{" "}

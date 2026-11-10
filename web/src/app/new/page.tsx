@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createCommittee, explainError } from "@/lib/actions";
 import { DAO_DEPOSIT_NEAR, TOKEN_SYMBOL } from "@/lib/config";
-import { money, toBase } from "@/lib/format";
+import { duration, money, toBase } from "@/lib/format";
+import { Circle } from "@/components/Circle";
+import type { Committee } from "@/lib/types";
 import type { PayoutMode } from "@/lib/types";
 import { useWallet } from "@/lib/wallet";
 
@@ -36,10 +38,50 @@ const MODES: { value: PayoutMode; title: string; text: string }[] = [
   },
 ];
 
+/** What the new circle will look like: you in the first seat, the rest open. */
+function preview(name: string, amount: bigint, size: number, roundSecs: number, mode: PayoutMode, you: string): Committee {
+  return {
+    id: 0,
+    name: name || "Your circle",
+    organizer: you,
+    token: "",
+    dao: null,
+    dao_ready: true,
+    amount: amount.toString(),
+    size,
+    round_secs: roundSecs,
+    mode,
+    status: "Open",
+    round: 0,
+    round_started_ms: 0,
+    members: [
+      {
+        account_id: you,
+        deposit: amount.toString(),
+        holdback: "0",
+        holdback_release: "0",
+        bonus: "0",
+        paid_out_round: null,
+        paid_this_round: false,
+        on_time: 0,
+        missed: 0,
+        claimed: false,
+      },
+    ],
+    bids: [],
+    events: [],
+    pot: (amount * BigInt(size)).toString(),
+    round_ends_ms: 0,
+    can_advance: false,
+    held: "0",
+    unforwarded: "0",
+  } as unknown as Committee;
+}
+
 export default function NewCommitteePage() {
   useTitle("Start a circle");
   const router = useRouter();
-  const { actor, signIn } = useWallet();
+  const { actor, signIn, accountId } = useWallet();
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("50");
   const [size, setSize] = useState(5);
@@ -51,6 +93,8 @@ export default function NewCommitteePage() {
 
   const valid = name.trim().length > 0 && name.length <= 64 && Number(amount) > 0 && size >= 2 && size <= 20;
   const base = valid ? toBase(amount) : 0n;
+  const each = Number(amount) > 0 ? toBase(amount) : 0n;
+  const draft = preview(name.trim(), each, size, roundSecs, mode, accountId ?? "you.testnet");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,7 +111,8 @@ export default function NewCommitteePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-start">
+      <div>
       <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Start a circle</h1>
       <p className="mt-3 text-text">
         Set the rules once. After that, nobody — including you — can change who gets paid or move the money.
@@ -204,6 +249,69 @@ export default function NewCommitteePage() {
           </Link>
         </div>
       </form>
+      </div>
+
+      <aside className="lg:sticky lg:top-24 space-y-5" aria-label="Preview">
+        <div className="card p-5">
+          <p className="text-sm font-semibold text-muted">Preview</p>
+          <p className="font-display text-2xl font-semibold text-ink mt-1 truncate">{name.trim() || "Your circle"}</p>
+          <div className="mt-2 -mx-2">
+            <Circle circle={draft} celebrate={null} />
+          </div>
+          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-rule pt-4">
+            <div>
+              <dt className="text-sm text-muted">Pot each round</dt>
+              <dd className="font-display text-2xl font-semibold text-ink num">
+                {money(each * BigInt(size))} <span className="text-base text-muted">{TOKEN_SYMBOL}</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted">Circle runs for</dt>
+              <dd className="font-display text-2xl font-semibold text-ink num">{duration(roundSecs * size)}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted">Each member pays in</dt>
+              <dd className="font-semibold text-ink num">
+                {money(each * BigInt(size))} {TOKEN_SYMBOL} in total
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted">Deposit to join</dt>
+              <dd className="font-semibold text-ink num">
+                {money(each)} {TOKEN_SYMBOL}, returned
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div className="card p-5">
+          <p className="font-display text-lg font-semibold text-ink">What happens next</p>
+          <ol className="mt-3 space-y-3">
+            {[
+              ["Share the invite", "You get a link to send on WhatsApp. Anyone with a NEAR account can join until the seats are full."],
+              ["Members lock a deposit", `Each pays a ${money(each)} ${TOKEN_SYMBOL} deposit when joining. It covers a missed payment and comes back at the end.`],
+              ["You start round 1", `Then everyone pays ${money(each)} ${TOKEN_SYMBOL} every ${duration(roundSecs)}, and one member takes the pot each round.`],
+            ].map(([t, d], i) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-marigold-wash border border-marigold/50 text-xs font-semibold text-ink inline-flex items-center justify-center num">
+                  {i + 1}
+                </span>
+                <span>
+                  <span className="font-semibold text-ink block">{t}</span>
+                  <span className="text-sm text-muted">{d}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {!actor && (
+          <p className="text-sm text-muted px-1">
+            Need test dollars? Connect a wallet, then press <span className="font-semibold text-ink">Get test dollars</span>{" "}
+            in the top bar for 1,000 free {TOKEN_SYMBOL}.
+          </p>
+        )}
+      </aside>
     </div>
   );
 }

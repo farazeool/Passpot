@@ -1,10 +1,11 @@
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
-import { ago, displayName, money } from "@/lib/format";
+import { ago, money } from "@/lib/format";
+import { Name } from "@/lib/profile";
 import { heldBack, howChosen } from "@/lib/ledger";
 import type { Committee, CommitteeEvent } from "@/lib/types";
 
 function sentence(e: CommitteeEvent, c: Committee): React.ReactNode {
-  const who = e.account_id ? displayName(e.account_id) : "";
+  const who = e.account_id ? <Name id={e.account_id} /> : null;
   const amt = `${money(e.amount)} ${TOKEN_SYMBOL}`;
   switch (e.kind) {
     case "Created":
@@ -19,19 +20,19 @@ function sentence(e: CommitteeEvent, c: Committee): React.ReactNode {
         </>
       );
     case "Joined":
-      return `${who} joined and locked a ${amt} deposit`;
+      return <>{who} joined and locked a {amt} deposit</>;
     case "Started":
       return `Round ${e.round} began`;
     case "Contributed":
-      return `${who} paid ${amt} for round ${e.round}`;
+      return <>{who} paid {amt} for round {e.round}</>;
     case "Bid": {
       const bps = Number(e.note?.match(/(\d+)/)?.[1] ?? 0);
-      return `${who} offered a ${bps / 100}% discount to get the pot this round`;
+      return <>{who} offered a {bps / 100}% discount to get the pot this round</>;
     }
     case "Covered":
-      return `${who} missed round ${e.round}; ${amt} was covered from their holdback and deposit`;
+      return <>{who} missed round {e.round}; {amt} was covered from their holdback and deposit</>;
     case "Shortfall":
-      return `${who} missed round ${e.round}; ${amt} could not be covered`;
+      return <>{who} missed round {e.round}; {amt} could not be covered</>;
     case "Payout": {
       const held = heldBack(e.note);
       return (
@@ -52,7 +53,7 @@ function sentence(e: CommitteeEvent, c: Committee): React.ReactNode {
         </>
       );
     case "Claimed":
-      return `${who} took back ${amt} (deposit, released holdback and any shared discounts)`;
+      return <>{who} took back {amt} (deposit, released holdback and any shared discounts)</>;
     case "Finished":
       return "Every member has had the pot. Members can now claim what's still locked.";
     default:

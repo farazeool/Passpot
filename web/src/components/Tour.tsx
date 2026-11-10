@@ -131,7 +131,7 @@ export function Tour({ steps, open, onClose }: { steps: TourStep[]; open: boolea
             </button>
           )}
           <button className="btn btn-primary btn-sm" autoFocus onClick={() => (last ? close() : setI(i + 1))}>
-            {last ? "Start playing" : "Next"}
+            {last ? "Got it" : "Next"}
           </button>
         </div>
       </div>

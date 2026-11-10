@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { displayName, money } from "@/lib/format";
+import { Name } from "@/lib/profile";
+import { Avatar } from "./Avatar";
 import { register, type Cell } from "@/lib/ledger";
 import type { Committee } from "@/lib/types";
 
@@ -49,10 +51,11 @@ export function Register({ circle: c }: { circle: Committee }) {
                 <th scope="row" className="text-left font-semibold py-2.5 pl-4 sm:pl-0 pr-3 whitespace-nowrap">
                   <Link
                     href={`/c/${c.id}/statement/${encodeURIComponent(row.accountId)}`}
-                    className="hover:underline underline-offset-4"
+                    className="inline-flex items-center gap-2 hover:underline underline-offset-4 align-middle"
                     title={`${displayName(row.accountId)}'s statement`}
                   >
-                    {displayName(row.accountId)}
+                    <Avatar id={row.accountId} size={24} />
+                    <Name id={row.accountId} first />
                   </Link>
                   {m.account_id === c.organizer && <span className="ml-1.5 text-xs font-normal text-muted">organizer</span>}
                 </th>
