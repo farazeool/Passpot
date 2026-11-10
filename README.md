@@ -24,7 +24,7 @@ Rota runs the whole circle on NEAR:
 
 ## Try it
 
-- **Live app:** _(Vercel URL)_. **Try a demo circle** drops you straight into a live circle already on round 2, where you can act as Ayesha, Bilal or Sara without a wallet. Or connect a NEAR testnet wallet and start your own.
+- **Live app:** https://rota-sage-pi.vercel.app. **Try a demo circle** drops you straight into a live circle already on round 2, where you can act as Ayesha, Bilal or Sara without a wallet. Or connect a NEAR testnet wallet and start your own.
 - **Contracts on testnet:** Rota `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
 - **A real circle's DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
 
