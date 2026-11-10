@@ -140,7 +140,7 @@ export default function Home() {
             of the pot behind as cover.
           </p>
         </div>
-        <div className="rounded-2xl border border-rule bg-sheet p-6 space-y-4 text-text">
+        <div className="card p-6 space-y-4 text-text">
           <p>
             Bilal wins round 1 of a 3-person circle: a{" "}
             <span className="num font-semibold">300 {TOKEN_SYMBOL}</span> pot. He&apos;s new, so{" "}
@@ -159,21 +159,21 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-8">
-        <div className="rounded-3xl bg-ink text-white p-8 sm:p-12 grid gap-8 lg:grid-cols-[1.4fr_1fr] items-center">
+        <div className="rounded-3xl bg-band text-band-fg p-8 sm:p-12 grid gap-8 lg:grid-cols-[1.4fr_1fr] items-center">
           <div>
             <h2 className="font-display text-3xl sm:text-4xl font-semibold">Nobody holds the cash. Not even the organizer.</h2>
-            <p className="mt-4 text-lg text-white/85 max-w-2xl">
+            <p className="mt-4 text-lg opacity-85 max-w-2xl">
               Each circle gets its own Sputnik DAO. Payments go straight in, and money only leaves through the
               DAO&apos;s own Transfer proposals — filed and approved by the circle&apos;s rules, because the rules are
               the DAO&apos;s only council member.
             </p>
           </div>
           <div className="space-y-3">
-            <p className="text-white/85">
+            <p className="opacity-85">
               Every circle has a Verify page that re-checks the vault, every payout and every draw in your browser,
               straight from the chain.
             </p>
-            <Link href="/circles" className="btn bg-white text-ink hover:bg-paper">
+            <Link href="/circles" className="btn btn-pot">
               See circles and verify one
             </Link>
           </div>

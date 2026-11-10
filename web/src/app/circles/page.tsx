@@ -1,5 +1,6 @@
 "use client";
 
+import { useTitle } from "@/lib/useTitle";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TOKEN_SYMBOL } from "@/lib/config";
@@ -15,6 +16,7 @@ const STATUS: Record<Committee["status"], string> = {
 };
 
 export default function CommitteesPage() {
+  useTitle("Circles");
   const { accountId } = useWallet();
   const [all, setAll] = useState<Committee[] | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -1,24 +1,67 @@
 @import "tailwindcss";
 
-/* Committee: the look of a hand-kept committee register.
-   Ink-blue on cool paper, one marigold accent for the pot and whose turn it is. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Rota: the look of a hand-kept committee register.
+   Light: ink-blue on cool paper. Dark: the same register by lamplight, deep indigo
+   with warm marigold. One accent everywhere: marigold, for the pot and whose turn it is. */
 :root {
   --font-public-sans: "Public Sans Variable";
   --font-familjen: "Familjen Grotesk Variable";
+  color-scheme: light;
+
   --paper: #f5f6f2;
   --sheet: #ffffff;
+  --sheet-raised: #ffffff;
   --ink: #22306b;
   --ink-soft: #4a5687;
   --text: #1b1f2e;
   --muted: #5d6273;
-  --rule: #dde0e6;
+  --rule: #dfe2e8;
   --rule-strong: #c4c8d2;
   --marigold: #e3a21a;
+  --marigold-strong: #d4940d;
   --marigold-wash: #fbf0d6;
   --paid: #2e7d5b;
   --paid-wash: #e3f1ea;
   --missed: #b8432f;
   --missed-wash: #f7e4df;
+  --primary-bg: #22306b;
+  --primary-bg-hover: #18225a;
+  --primary-fg: #ffffff;
+  --band: #22306b;
+  --band-fg: #ffffff;
+  --shadow: 0 1px 2px rgb(27 31 46 / 0.04), 0 4px 16px rgb(27 31 46 / 0.04);
+  --shadow-lift: 0 2px 4px rgb(27 31 46 / 0.06), 0 10px 28px rgb(27 31 46 / 0.08);
+  --selection: #fbe3a8;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #10142a;
+  --sheet: #171c36;
+  --sheet-raised: #1d2342;
+  --ink: #d7ddff;
+  --ink-soft: #a9b3e6;
+  --text: #e6e8f2;
+  --muted: #9aa1bd;
+  --rule: #262c4c;
+  --rule-strong: #384066;
+  --marigold: #f0b23a;
+  --marigold-strong: #f5c25e;
+  --marigold-wash: #33290f;
+  --paid: #63c497;
+  --paid-wash: #15352a;
+  --missed: #ef8a72;
+  --missed-wash: #3d211c;
+  --primary-bg: #d7ddff;
+  --primary-bg-hover: #ffffff;
+  --primary-fg: #10142a;
+  --band: #1d2342;
+  --band-fg: #e6e8f2;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 4px 16px rgb(0 0 0 / 0.2);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.35);
+  --selection: #5a4614;
 }
 
 @theme inline {
@@ -36,6 +79,8 @@
   --color-paid-wash: var(--paid-wash);
   --color-missed: var(--missed);
   --color-missed-wash: var(--missed-wash);
+  --color-band: var(--band);
+  --color-band-fg: var(--band-fg);
   --font-sans: var(--font-public-sans);
   --font-display: var(--font-familjen);
 }
@@ -43,126 +88,238 @@
 html {
   background: var(--paper);
   color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+/* Theme switches cross-fade instead of flashing. */
+html.theme-switching,
+html.theme-switching * {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    fill 220ms ease !important;
 }
 
 body {
   font-family: var(--font-public-sans), system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 16.5px;
+  line-height: 1.6;
+  font-feature-settings: "kern", "liga", "calt";
+  background: var(--paper);
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li,
+dd {
+  text-wrap: pretty;
 }
 
 .font-display {
   font-family: var(--font-familjen), var(--font-public-sans), sans-serif;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.022em;
+  font-feature-settings: "ss01", "kern";
+}
+
+h1.font-display {
+  letter-spacing: -0.03em;
 }
 
 .num {
   font-variant-numeric: tabular-nums;
 }
 
-/* Ruled paper for the register. */
-.ruled {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 43px,
-    var(--rule) 43px,
-    var(--rule) 44px
-  );
+.card {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow);
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid var(--marigold);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
+/* Buttons: pill-shaped, a soft lift on hover, a small press on click. */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 44px;
-  padding: 0 1.1rem;
+  min-height: 42px;
+  padding: 0 1.05rem;
   border-radius: 999px;
   font-weight: 600;
-  font-size: 0.95rem;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  font-size: 0.925rem;
+  letter-spacing: -0.005em;
   white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 200ms ease,
+    transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 60ms;
 }
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
 }
+.btn-sm {
+  min-height: 34px;
+  padding: 0 0.8rem;
+  font-size: 0.85rem;
+}
 .btn-primary {
-  background: var(--ink);
-  color: #fff;
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.08) inset, var(--shadow);
 }
 .btn-primary:hover:not(:disabled) {
-  background: #18225a;
+  background: var(--primary-bg-hover);
+  box-shadow: var(--shadow-lift);
 }
 .btn-pot {
   background: var(--marigold);
   color: #241a02;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 2px 10px rgb(227 162 26 / 0.25);
 }
 .btn-pot:hover:not(:disabled) {
-  background: #d4940d;
+  background: var(--marigold-strong);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 6px 20px rgb(227 162 26 / 0.35);
 }
 .btn-quiet {
-  background: transparent;
+  background: var(--sheet);
   color: var(--ink);
   border: 1px solid var(--rule-strong);
 }
 .btn-quiet:hover:not(:disabled) {
-  border-color: var(--ink);
+  border-color: var(--ink-soft);
+  box-shadow: var(--shadow);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--sheet);
+}
+
+.spinner {
+  width: 1em;
+  height: 1em;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 700ms linear infinite;
+  flex: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .field {
   width: 100%;
   min-height: 44px;
-  padding: 0.55rem 0.8rem;
+  padding: 0.55rem 0.85rem;
   border: 1px solid var(--rule-strong);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--sheet);
   color: var(--text);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.field::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+.field:hover {
+  border-color: var(--ink-soft);
 }
 .field:focus {
-  outline: 2px solid var(--ink);
-  outline-offset: 0;
-  border-color: var(--ink);
+  outline: none;
+  border-color: var(--marigold);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--marigold) 22%, transparent);
 }
 
 a.link {
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
   text-decoration-color: var(--rule-strong);
+  transition: text-decoration-color 160ms ease;
 }
 a.link:hover {
-  text-decoration-color: var(--ink);
+  text-decoration-color: var(--marigold);
 }
 
-/* The pot passing between members. */
-@keyframes pass {
+/* Loading placeholders that hold the page's shape. */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--rule) 0%,
+    color-mix(in srgb, var(--rule) 45%, var(--sheet)) 50%,
+    var(--rule) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 10px;
+}
+@keyframes shimmer {
   from {
-    transform: rotate(var(--from));
+    background-position: 100% 0;
   }
   to {
-    transform: rotate(var(--to));
+    background-position: -100% 0;
   }
 }
 
-@keyframes draw-flicker {
-  0%,
-  100% {
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
     opacity: 1;
+    transform: none;
   }
-  50% {
-    opacity: 0.35;
-  }
+}
+.toast {
+  animation: toast-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
@@ -170,11 +327,16 @@ a.link:hover {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  .btn:hover:not(:disabled),
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 @media print {
   html,
   body {
     background: #fff;
+    color: #1b1f2e;
   }
 }

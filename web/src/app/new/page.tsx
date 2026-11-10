@@ -1,5 +1,6 @@
 "use client";
 
+import { useTitle } from "@/lib/useTitle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,6 +37,7 @@ const MODES: { value: PayoutMode; title: string; text: string }[] = [
 ];
 
 export default function NewCommitteePage() {
+  useTitle("Start a circle");
   const router = useRouter();
   const { actor, signIn } = useWallet();
   const [name, setName] = useState("");
@@ -157,7 +159,7 @@ export default function NewCommitteePage() {
           ))}
         </fieldset>
 
-        <label className="flex gap-3 items-start rounded-2xl border border-rule bg-sheet p-4 cursor-pointer">
+        <label className="flex gap-3 items-start card p-4 cursor-pointer">
           <input
             type="checkbox"
             className="mt-1 h-5 w-5 shrink-0 accent-[var(--ink)]"

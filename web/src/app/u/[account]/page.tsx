@@ -1,5 +1,6 @@
 "use client";
 
+import { useTitle } from "@/lib/useTitle";
 import { Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -11,6 +12,7 @@ import type { Committee, Reputation } from "@/lib/types";
 function ProfilePageInner() {
   const { account } = useParams<{ account: string }>();
   const accountId = decodeURIComponent(account);
+  useTitle(displayName(accountId));
   const [rep, setRep] = useState<Reputation | null>(null);
   const [circles, setCommittees] = useState<Committee[] | null>(null);
 
@@ -34,7 +36,7 @@ function ProfilePageInner() {
       <p className="text-sm text-muted break-all">{accountId}</p>
       <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">{displayName(accountId)}</h1>
 
-      <section className="mt-8 rounded-2xl bg-sheet border border-rule p-5 sm:p-6" aria-labelledby="record">
+      <section className="mt-8 card p-5 sm:p-6" aria-labelledby="record">
         <h2 id="record" className="font-display text-xl font-semibold text-ink">
           {tier}
         </h2>

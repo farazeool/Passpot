@@ -29,7 +29,7 @@ export function Invite({ circle: c }: { circle: Committee }) {
   }
 
   return (
-    <section aria-labelledby="invite" className="rounded-2xl bg-sheet border border-rule p-5 sm:p-6">
+    <section aria-labelledby="invite" className="card p-5 sm:p-6">
       <h2 id="invite" className="font-display text-xl font-semibold text-ink">
         {open} seat{open === 1 ? "" : "s"} still open
       </h2>
@@ -58,7 +58,7 @@ export function Remind({ circle: c, now }: { circle: Committee; now: number }) {
     due > 0 ? `in ${countdown(due)}` : "now"
   }. Still to pay: ${list}. If a payment is missed, it's covered from that member's holdback, and it shows on their record. Pay here: ${url}`;
   return (
-    <section aria-labelledby="remind" className="rounded-2xl bg-sheet border border-rule p-5 sm:p-6">
+    <section aria-labelledby="remind" className="card p-5 sm:p-6">
       <h2 id="remind" className="font-display text-xl font-semibold text-ink">
         Still to pay this round
       </h2>

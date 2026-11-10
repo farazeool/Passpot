@@ -5,6 +5,8 @@ import "@fontsource-variable/public-sans";
 import "@near-wallet-selector/modal-ui/styles.css";
 import "./globals.css";
 import { Header } from "@/components/Header";
+import { ToastProvider } from "@/components/Toast";
+import { themeScript } from "@/components/ThemeToggle";
 import { WalletProvider } from "@/lib/wallet";
 
 export const metadata: Metadata = {
@@ -15,9 +17,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" data-theme="light" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#10142a" media="(prefers-color-scheme: dark)" />
+      </head>
       <body className="min-h-dvh flex flex-col">
         <WalletProvider>
+          <ToastProvider>
           <Suspense fallback={<div className="h-16 border-b border-rule" />}>
             <Header />
           </Suspense>
@@ -33,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span>Built at NEAR HACKATHON</span>
             </div>
           </footer>
+          </ToastProvider>
         </WalletProvider>
       </body>
     </html>

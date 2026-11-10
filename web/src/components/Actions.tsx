@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "./Toast";
 import * as act from "@/lib/actions";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL } from "@/lib/config";
@@ -20,6 +21,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [bidPct, setBidPct] = useState("5");
+  const toast = useToast();
 
   const me = actor ? c.members.find((m) => m.account_id === actor.accountId) : undefined;
   const isOrganizer = actor?.accountId === c.organizer;
@@ -30,11 +32,12 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
   const youHave = who ? `${who} has` : "You've";
   const yourSub = who ? `${who}'s` : "Your";
 
-  async function run(label: string, fn: () => Promise<unknown>) {
+  async function run(label: string, fn: () => Promise<act.CallResult>, done: string) {
     setBusy(label);
     setError(null);
     try {
-      await fn();
+      const r = await fn();
+      toast(done, { hash: r?.hash });
       onDone();
     } catch (e) {
       setError(act.explainError(e));
@@ -43,11 +46,18 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
     }
   }
 
-  const btn = (label: string, doing: string, fn: () => Promise<unknown>, style = "btn-primary") => (
-    <button className={`btn ${style} w-full sm:w-auto`} disabled={!!busy} onClick={() => run(label, fn)}>
-      {busy === label ? doing : label}
+  const btn = (label: string, doing: string, fn: () => Promise<act.CallResult>, style = "btn-primary", done = "Done.") => (
+    <button
+      className={`btn ${style} w-full sm:w-auto`}
+      disabled={!!busy}
+      aria-busy={busy === label}
+      onClick={() => run(label, fn, done)}
+    >
+      {busy === label && <span className="spinner" aria-hidden />}
+      {busy === label ? doing.replace(/…$/, "") : label}
     </button>
   );
+  const name = who ?? "You";
 
   const items: React.ReactNode[] = [];
 
@@ -55,7 +65,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
     items.push(
       <div key="dao" className="space-y-2">
         <p>The circle&apos;s DAO vault is being set up. No money can come in until it&apos;s confirmed.</p>
-        {actor ? btn("Check the DAO", "Checking…", () => act.recheckDao(actor, c), "btn-quiet") : null}
+        {actor ? btn("Check the DAO", "Checking…", () => act.recheckDao(actor, c), "btn-quiet", "The DAO vault is confirmed.") : null}
       </div>,
     );
   } else if (!actor) {
@@ -75,7 +85,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
             Join by locking a deposit of <strong className="num">{amount}</strong>. You get it back when the circle
             ends; it only covers you if you ever miss a payment.
           </p>
-          {btn(`Join and lock ${amount}`, "Joining…", () => act.join(actor, c))}
+          {btn(`Join and lock ${amount}`, "Joining…", () => act.join(actor, c), "btn-primary", `${name} joined and locked a ${amount} deposit.`)}
         </div>,
       );
     } else if (me && c.members.length < c.size) {
@@ -91,7 +101,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
         items.push(
           <div key="start" className="space-y-2">
             <p>Every seat is taken. Start round 1 when everyone is ready.</p>
-            {btn("Start the circle", "Starting…", () => act.start(actor, c), "btn-pot")}
+            {btn("Start the circle", "Starting…", () => act.start(actor, c), "btn-pot", "Round 1 has started.")}
           </div>,
         );
       } else {
@@ -106,7 +116,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
             {yourSub} round {c.round} payment of <strong className="num">{amount}</strong> is due
             {ended ? " — the round has ended, so it may be covered from your holdback." : ` in ${countdown(c.round_ends_ms - now)}.`}
           </p>
-          {btn(`Pay ${amount}`, "Paying…", () => act.contribute(actor, c))}
+          {btn(`Pay ${amount}`, "Paying…", () => act.contribute(actor, c), "btn-primary", `${name} paid ${amount} for round ${c.round}.`)}
         </div>,
       );
     } else if (me) {
@@ -133,7 +143,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
               onChange={(e) => setBidPct(e.target.value)}
             />
             <span className="text-muted">%</span>
-            {btn("Offer discount", "Offering…", () => act.bid(actor, c, Math.round(Number(bidPct) * 100)), "btn-quiet")}
+            {btn("Offer discount", "Offering…", () => act.bid(actor, c, Math.round(Number(bidPct) * 100)), "btn-quiet", `Offered a ${bidPct}% discount for this round's pot.`)}
           </div>
         </div>,
       );
@@ -157,6 +167,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
             "Closing…",
             () => act.advance(actor, c),
             "btn-pot",
+            `Round ${c.round} closed and the pot went out. Watch the circle.`,
           )}
         </div>,
       );
@@ -170,7 +181,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
             The circle is done. Take back <strong className="num">{money(total)} {TOKEN_SYMBOL}</strong>: your
             deposit, any holdback, and shared discounts.
           </p>
-          {btn(`Claim ${money(total)} ${TOKEN_SYMBOL}`, "Claiming…", () => act.claim(actor, c), "btn-pot")}
+          {btn(`Claim ${money(total)} ${TOKEN_SYMBOL}`, "Claiming…", () => act.claim(actor, c), "btn-pot", `${name} claimed ${money(total)} ${TOKEN_SYMBOL}.`)}
         </div>,
       );
     } else if (me) {

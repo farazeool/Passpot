@@ -206,7 +206,7 @@ export function Circle({ circle: c, celebrate, sound = false }: Props) {
   const coins = c.status === "Running" ? paidCount : c.status === "Open" ? 0 : 0;
 
   return (
-    <figure className="w-full max-w-[560px] mx-auto" aria-label={`${c.name}: ${centerTitle}, pot ${money(c.pot)} ${TOKEN_SYMBOL}`}>
+    <figure className="w-full max-w-[640px] mx-auto" aria-label={`${c.name}: ${centerTitle}, pot ${money(c.pot)} ${TOKEN_SYMBOL}`}>
       <svg viewBox={`-60 0 ${W + 120} ${H}`} className="w-full h-auto overflow-visible" role="img">
         <title>{`${c.name}: ${centerTitle}`}</title>
         <Mat />
@@ -243,8 +243,8 @@ export function Circle({ circle: c, celebrate, sound = false }: Props) {
 
         {/* Pot amount */}
         <g transform={`translate(${CX} ${CY - 70})`}>
-          <rect x="-46" y="-17" width="92" height="30" rx="15" fill="var(--sheet)" stroke="var(--marigold)" strokeWidth="1.5" />
-          <text y="4" textAnchor="middle" className="font-display num" fontSize="15" fontWeight="600" fill="var(--ink)">
+          <rect x="-58" y="-19" width="116" height="34" rx="17" fill="var(--sheet)" stroke="var(--marigold)" strokeWidth="1.5" />
+          <text y="5" textAnchor="middle" className="font-display num" fontSize="17" fontWeight="600" fill="var(--ink)">
             {money(c.pot)} {TOKEN_SYMBOL}
           </text>
         </g>
@@ -305,14 +305,14 @@ function SeatLabel({ s }: { s: { x: number; y: number; member: Committee["member
   const side = Math.abs(s.x - CX) > SEAT_RX * 0.8;
   const right = s.x > CX;
   // Side seats: name outside the mat, level with the person. Front: below. Back: above.
-  const x = side ? s.x + (right ? 44 : -44) : s.x;
+  const x = side ? s.x + (right ? 42 : -42) : s.x;
   const y = side ? s.y - 18 : front ? s.y + 34 : s.y - 84;
   return (
     <text
       x={x}
       y={y}
       textAnchor={side ? (right ? "start" : "end") : "middle"}
-      fontSize="13.5"
+      fontSize="18"
       fontWeight={m ? 600 : 400}
       fill={m ? "var(--text)" : "var(--muted)"}
       stroke="var(--paper)"

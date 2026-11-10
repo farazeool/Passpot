@@ -1,5 +1,6 @@
 "use client";
 
+import { useTitle } from "@/lib/useTitle";
 import { circleName } from "@/lib/format";
 
 import { Suspense } from "react";
@@ -12,6 +13,7 @@ import type { Committee } from "@/lib/types";
 import { runChecks, type Check } from "@/lib/verify";
 
 function VerifyPageInner() {
+  useTitle("Check it yourself");
   const { id } = useParams<{ id: string }>();
   const [c, setC] = useState<Committee | null>(null);
   const [checks, setChecks] = useState<Check[] | null>(null);
@@ -75,7 +77,7 @@ function VerifyPageInner() {
 
       <ol className="mt-8 space-y-4">
         {checks?.map((ch) => (
-          <li key={ch.title} className="rounded-2xl bg-sheet border border-rule p-5">
+          <li key={ch.title} className="card p-5">
             <div className="flex items-start gap-3">
               <span
                 aria-hidden

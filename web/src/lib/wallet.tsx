@@ -54,6 +54,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
       const m = setupModal(s, {
         contractId: CONTRACT,
+        theme: "auto",
         description: "Rota uses your NEAR testnet account to join and pay into savings circles.",
       });
       const sync = () => {

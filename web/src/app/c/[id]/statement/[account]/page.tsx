@@ -69,7 +69,7 @@ function StatementInner() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-rule bg-sheet p-5">
+      <section className="card p-5">
         <h2 className="font-display text-xl font-semibold text-ink">{circleName(c.name)}</h2>
         <p className="text-sm text-muted">
           Circle #{c.id}, organized by {displayName(c.organizer)}. {c.size} members, {money(c.amount)} {TOKEN_SYMBOL} per

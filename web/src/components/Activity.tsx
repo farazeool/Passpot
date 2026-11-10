@@ -1,5 +1,5 @@
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
-import { displayName, money } from "@/lib/format";
+import { ago, displayName, money } from "@/lib/format";
 import { heldBack, howChosen } from "@/lib/ledger";
 import type { Committee, CommitteeEvent } from "@/lib/types";
 
@@ -69,8 +69,12 @@ export function Activity({ circle: c }: { circle: Committee }) {
           key={`${e.timestamp_ms}-${i}`}
           className={`flex gap-3 py-2.5 border-t border-rule text-sm ${e.kind === "Payout" ? "bg-marigold-wash/60 -mx-3 px-3 rounded" : ""}`}
         >
-          <time className="text-muted num w-[4.5rem] shrink-0" dateTime={new Date(e.timestamp_ms).toISOString()}>
-            {new Date(e.timestamp_ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          <time
+            className="text-muted num w-[5.5rem] shrink-0"
+            dateTime={new Date(e.timestamp_ms).toISOString()}
+            title={new Date(e.timestamp_ms).toLocaleString()}
+          >
+            {ago(e.timestamp_ms)}
           </time>
           <span>{sentence(e, c)}</span>
         </li>

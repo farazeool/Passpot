@@ -1,5 +1,6 @@
 "use client";
 
+import { useTitle } from "@/lib/useTitle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ interface Step {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function DemoPage() {
+  useTitle("Try a demo circle");
   const router = useRouter();
   const [info, setInfo] = useState<DemoInfo | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
@@ -136,7 +138,7 @@ export default function DemoPage() {
 
       {!looking && info?.enabled && steps.length === 0 && (
         <div className="mt-8 space-y-5">
-          <label className="flex gap-3 items-start rounded-2xl bg-sheet border border-rule p-4 cursor-pointer">
+          <label className="flex gap-3 items-start card p-4 cursor-pointer">
             <input
               type="checkbox"
               className="mt-1 h-5 w-5 shrink-0 accent-[var(--ink)]"

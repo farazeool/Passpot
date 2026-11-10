@@ -9,6 +9,7 @@ import { money, shortName } from "@/lib/format";
 import { getTokenBalance } from "@/lib/near";
 import { useWallet } from "@/lib/wallet";
 import { Mark } from "./Mark";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   const { accountId, signIn, signOut, actor, ready } = useWallet();
@@ -73,6 +74,7 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           {accountId ? (
             <>
               <div className="hidden sm:flex flex-col items-end leading-tight mr-1">
@@ -84,7 +86,8 @@ export function Header() {
                 </span>
               </div>
               <button className="btn btn-quiet" onClick={getDollars} disabled={busy}>
-                {busy ? "Adding…" : "Get test dollars"}
+                {busy && <span className="spinner" aria-hidden />}
+                {busy ? "Adding" : "Get test dollars"}
               </button>
               <button className="btn btn-quiet hidden sm:inline-flex" onClick={() => signOut()}>
                 Sign out

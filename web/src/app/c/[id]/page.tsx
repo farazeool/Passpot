@@ -8,6 +8,8 @@ import { Actions } from "@/components/Actions";
 import { Activity } from "@/components/Activity";
 import { Circle } from "@/components/Circle";
 import { SoundToggle } from "@/components/SoundToggle";
+import { Copy } from "@/components/Copy";
+import { useTitle } from "@/lib/useTitle";
 import { Invite, Remind } from "@/components/Share";
 import { Register } from "@/components/Register";
 import type { Actor } from "@/lib/actions";
@@ -73,10 +75,12 @@ function CommitteePageInner() {
     if (isDemo && !persona && demo?.members.length) setPersona(demo.members[0]);
   }, [isDemo, persona, demo]);
 
+  useTitle(c ? circleName(c.name) : c === null ? "Circle not found" : null);
+
   const actor: Actor | null = isDemo && persona ? demoActor(persona) : walletActor;
 
   if (c === undefined) {
-    return <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 text-muted">Reading the circle from NEAR…</div>;
+    return <CircleSkeleton />;
   }
   if (c === null) {
     return (
@@ -148,13 +152,13 @@ function CommitteePageInner() {
         </section>
       )}
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,460px)_1fr] items-start">
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,520px)_1fr] items-start">
         <div className="lg:sticky lg:top-24">
           <Circle circle={c} celebrate={celebrate} sound />
         </div>
 
         <div className="space-y-10 min-w-0">
-          <section aria-labelledby="todo" className="rounded-2xl bg-sheet border border-rule p-5 sm:p-6">
+          <section aria-labelledby="todo" className="card p-5 sm:p-6">
             <h2 id="todo" className="font-display text-xl font-semibold text-ink mb-3">
               {actor ? `What ${isDemo ? displayName(actor.accountId) : "you"} can do` : "Take part"}
             </h2>
@@ -203,7 +207,8 @@ function CommitteePageInner() {
                 In this circle&apos;s own Sputnik DAO,{" "}
                 <a className="link break-all" href={explorerAccount(c.dao)} target="_blank" rel="noreferrer">
                   {c.dao}
-                </a>
+                </a>{" "}
+                <Copy value={c.dao} label="Copy the DAO address" />
                 . Its only council member is the Rota contract, so no person — not even the organizer — can move
                 it. It should hold <strong className="num">{money(c.held)} {TOKEN_SYMBOL}</strong> right now.
               </p>
@@ -227,9 +232,28 @@ function CommitteePageInner() {
   );
 }
 
+/** Holds the page's shape while the circle loads from NEAR. */
+function CircleSkeleton() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14" aria-busy="true" aria-label="Loading the circle from NEAR">
+      <div className="skeleton h-4 w-56" />
+      <div className="skeleton h-12 w-[min(32rem,90%)] mt-3" />
+      <div className="skeleton h-4 w-80 mt-4" />
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,520px)_1fr] items-start">
+        <div className="skeleton aspect-[4/3] w-full rounded-[2rem]" />
+        <div className="space-y-6">
+          <div className="skeleton h-40 w-full rounded-[1.25rem]" />
+          <div className="skeleton h-6 w-40" />
+          <div className="skeleton h-48 w-full rounded-[1.25rem]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CommitteePage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 text-muted">Loading…</div>}>
+    <Suspense fallback={<CircleSkeleton />}>
       <CommitteePageInner />
     </Suspense>
   );
