@@ -55,6 +55,7 @@ export function Header() {
     { href: "/", label: "Home" },
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
+    { href: "/about", label: "About" },
     ...(accountId ? [{ href: "/money", label: "Your money" }] : []),
   ];
 
@@ -62,8 +63,8 @@ export function Header() {
     <header className="border-b border-rule bg-paper/90 backdrop-blur sticky top-0 z-30 print:hidden">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Rota home">
-          <Mark size={28} />
-          <span className="font-display text-xl font-semibold text-ink">Rota</span>
+          <Mark size={34} />
+          <span className="font-display text-[1.65rem] font-bold tracking-[-0.03em] text-ink">Rota</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1 ml-4">
           {nav.map((n) => (
