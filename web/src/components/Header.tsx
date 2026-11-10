@@ -7,7 +7,7 @@ import { explainError, faucet } from "@/lib/actions";
 import { TOKEN_SYMBOL } from "@/lib/config";
 import { money } from "@/lib/format";
 import { nameOf, useProfile } from "@/lib/profile";
-import { Avatar } from "./Avatar";
+import { Avatar, Person } from "./Avatar";
 import { getTokenBalance } from "@/lib/near";
 import { useWallet } from "@/lib/wallet";
 import { Mark } from "./Mark";
@@ -54,7 +54,6 @@ export function Header() {
   const nav = [
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
-    { href: "/profile", label: "Your profile", match: accountId ? `/u/${accountId}` : "/profile" },
   ];
 
   return (
@@ -70,7 +69,7 @@ export function Header() {
               key={n.href}
               href={n.href}
               className={`px-3 py-2 rounded-full text-sm font-medium ${
-                pathname?.startsWith(n.match ?? n.href) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
+                pathname?.startsWith(n.href) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
               }`}
             >
               {n.label}
@@ -103,9 +102,20 @@ export function Header() {
               </button>
             </>
           ) : (
-            <button className="btn btn-primary" onClick={signIn} disabled={!ready}>
-              Connect wallet
-            </button>
+            <>
+              <button
+                onClick={signIn}
+                disabled={!ready}
+                className="rounded-full hover:opacity-80 transition-opacity"
+                aria-label="Connect wallet to make your profile"
+                title="Connect wallet to make your profile"
+              >
+                <Person id="" size={34} />
+              </button>
+              <button className="btn btn-primary" onClick={signIn} disabled={!ready}>
+                Connect wallet
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { explainError, type Actor } from "@/lib/actions";
-import { saveProfile, type Profile } from "@/lib/profile";
+import { saveProfile, type Gender, type Profile } from "@/lib/profile";
+import { Person } from "./Avatar";
 import { useToast } from "./Toast";
 
 /** Edit your profile. Saved to NEAR Social, so it follows you to other NEAR apps too. */
@@ -21,6 +22,7 @@ export function ProfileForm({
 }) {
   const toast = useToast();
   const [name, setName] = useState(initial?.name ?? "");
+  const [gender, setGender] = useState<Gender | undefined>(initial?.gender || undefined);
   const [location, setLocation] = useState(initial?.location ?? "");
   const [savingFor, setSavingFor] = useState(initial?.saving_for ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -29,7 +31,7 @@ export function ProfileForm({
   const [error, setError] = useState<string | null>(null);
 
   const imageOk = !image.trim() || /^https:\/\/\S+$/.test(image.trim());
-  const valid = name.trim().length > 0 && name.length <= 48 && imageOk;
+  const valid = name.trim().length > 0 && name.length <= 48 && imageOk && !!gender;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +40,7 @@ export function ProfileForm({
     try {
       const p = await saveProfile(actor, {
         name,
+        gender,
         location,
         saving_for: savingFor,
         description,
@@ -60,6 +63,25 @@ export function ProfileForm({
           Circles run on trust. A real name and a line about you help people say yes when you ask to join.
         </p>
       </div>
+      <fieldset>
+        <legend className="font-semibold text-ink text-sm mb-2">Your avatar</legend>
+        <div className="flex flex-wrap items-center gap-3" role="radiogroup">
+          <Person id={actor.accountId} gender={gender} size={64} className="mr-1 transition-all" />
+          {(["male", "female"] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              role="radio"
+              aria-checked={gender === g}
+              onClick={() => setGender(g)}
+              className={`btn ${gender === g ? "btn-primary" : "btn-quiet"}`}
+            >
+              <Person id={actor.accountId} gender={g} size={24} />
+              {g === "male" ? "Male" : "Female"}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label htmlFor="p-name" className="font-semibold text-ink text-sm block">

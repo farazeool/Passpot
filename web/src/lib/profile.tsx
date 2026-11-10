@@ -8,7 +8,10 @@ import { SOCIAL_DB } from "./config";
 import { displayName } from "./format";
 import { view } from "./near";
 
+export type Gender = "male" | "female";
+
 export interface Profile {
+  gender?: Gender;
   name?: string;
   description?: string;
   location?: string;
@@ -99,6 +102,7 @@ export async function saveProfile(a: Actor, p: Profile) {
     description: clean(p.description),
     location: clean(p.location),
     saving_for: clean(p.saving_for),
+    gender: p.gender ?? "",
     image: { url: clean(p.image?.url) },
   };
   await a.call(SOCIAL_DB, "set", { data: { [a.accountId]: { profile } } }, 100, NEAR / 10n);
