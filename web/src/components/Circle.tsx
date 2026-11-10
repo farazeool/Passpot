@@ -36,6 +36,8 @@ interface Props {
   celebrate?: { accountId: string; key: string } | null;
   /** Plays sounds for payments and payouts (the committee page; not the hero). */
   sound?: boolean;
+  /** Extra marks for the landing page story: a missed payment, then covered. */
+  marks?: Record<string, "missed" | "covered">;
 }
 
 function Person({ seed, x, y, lit, empty, back }: { seed: string; x: number; y: number; lit: boolean; empty: boolean; back: boolean }) {
@@ -132,7 +134,7 @@ function Mat() {
  * The circle: members around the mat, the pot in the middle.
  * A green tick = paid this round. A gold coin badge = has received the pot.
  */
-export function Circle({ circle: c, celebrate, sound = false }: Props) {
+export function Circle({ circle: c, celebrate, sound = false, marks }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const [phase, setPhase] = useState<"idle" | "drawing" | "passing">("idle");
   const [flicker, setFlicker] = useState(-1);
@@ -216,13 +218,13 @@ export function Circle({ circle: c, celebrate, sound = false }: Props) {
         {order
           .filter((s) => s.y < CY)
           .map((s) => (
-            <Seat key={s.index} s={s} c={c} lit={phase === "drawing" && s.index === flicker} won={phase === "passing" && s.index === winnerIndex} />
+            <Seat key={s.index} s={s} c={c} mark={s.member ? marks?.[s.member.account_id] : undefined} lit={phase === "drawing" && s.index === flicker} won={phase === "passing" && s.index === winnerIndex} />
           ))}
         <Pot coins={phase === "passing" ? 0 : coins} />
         {order
           .filter((s) => s.y >= CY)
           .map((s) => (
-            <Seat key={s.index} s={s} c={c} lit={phase === "drawing" && s.index === flicker} won={phase === "passing" && s.index === winnerIndex} />
+            <Seat key={s.index} s={s} c={c} mark={s.member ? marks?.[s.member.account_id] : undefined} lit={phase === "drawing" && s.index === flicker} won={phase === "passing" && s.index === winnerIndex} />
           ))}
 
         {/* The pot's coins travel to the winner. */}
@@ -265,7 +267,9 @@ function Seat({
   c,
   lit,
   won,
+  mark,
 }: {
+  mark?: "missed" | "covered";
   s: { x: number; y: number; member: Committee["members"][number] | undefined; index: number };
   c: Committee;
   lit: boolean;
@@ -283,6 +287,17 @@ function Seat({
           <title>Paid this round</title>
           <circle r="8" fill="var(--paid)" stroke="var(--sheet)" strokeWidth="1.5" />
           <path d="M -3.5 0 L -1 2.6 L 3.6 -2.4" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      )}
+      {mark && (
+        <g transform={`translate(${s.x + 26} ${s.y - 70}) scale(1.35)`} className="mark-pop">
+          <title>{mark === "missed" ? "Missed this payment" : "Covered from their holdback"}</title>
+          <circle r="11" fill={mark === "missed" ? "var(--missed)" : "var(--marigold)"} stroke="var(--sheet)" strokeWidth="2" />
+          {mark === "missed" ? (
+            <path d="M -3.6 -3.6 L 3.6 3.6 M 3.6 -3.6 L -3.6 3.6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+          ) : (
+            <path d="M 0 -5.5 L 4.8 -3.5 V 0.5 C 4.8 3.4 2.6 5.2 0 6 C -2.6 5.2 -4.8 3.4 -4.8 0.5 V -3.5 Z" fill="#241a02" />
+          )}
         </g>
       )}
       {received && (

@@ -4,21 +4,34 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Circle } from "@/components/Circle";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { getConfig } from "@/lib/near";
+import { getCommittees } from "@/lib/near";
 import type { Committee, Member } from "@/lib/types";
 
 const NAMES = ["ayesha", "bilal", "sara", "omar", "hina"];
+const ID = (n: string) => `${n}.testnet`;
 
-/** A sample circle for the hero: the pot passes around the circle. */
-function sample(round: number): Committee {
-  const members: Member[] = NAMES.map((n, i) => ({
-    account_id: `${n}.testnet`,
+/** The hero tells one story on a loop: round 2, Bilal misses, his holdback covers it, Sara still gets the full pot. */
+const STORY: { paid: string[]; mark?: "missed" | "covered"; winner?: boolean; text: string; ms: number }[] = [
+  { paid: [], text: "Round 2. Everyone pays 50 tUSD into the vault.", ms: 1500 },
+  { paid: ["ayesha"], text: "Round 2. Everyone pays 50 tUSD into the vault.", ms: 650 },
+  { paid: ["ayesha", "sara"], text: "Round 2. Everyone pays 50 tUSD into the vault.", ms: 650 },
+  { paid: ["ayesha", "sara", "omar"], text: "Round 2. Everyone pays 50 tUSD into the vault.", ms: 650 },
+  { paid: ["ayesha", "sara", "omar", "hina"], text: "Round 2. Everyone pays 50 tUSD into the vault.", ms: 1100 },
+  { paid: ["ayesha", "sara", "omar", "hina"], mark: "missed", text: "Bilal already had the pot in round 1. Now he stops paying.", ms: 2600 },
+  { paid: ["ayesha", "sara", "omar", "hina"], mark: "covered", text: "The money held back from his pot covers it.", ms: 2600 },
+  { paid: ["ayesha", "sara", "omar", "hina", "bilal"], winner: true, text: "Sara still gets the full 250 tUSD.", ms: 4200 },
+];
+
+function storyCircle(step: number): Committee {
+  const st = STORY[step];
+  const members: Member[] = NAMES.map((n) => ({
+    account_id: ID(n),
     deposit: "50000000",
     holdback: "0",
     holdback_release: "0",
     bonus: "0",
-    paid_out_round: i < round - 1 ? i + 1 : null,
-    paid_this_round: true,
+    paid_out_round: n === "bilal" ? 1 : st.winner && n === "sara" ? 2 : null,
+    paid_this_round: st.paid.includes(n),
     on_time: 0,
     missed: 0,
     claimed: false,
@@ -26,7 +39,7 @@ function sample(round: number): Committee {
   return {
     id: 0,
     name: "Khan family committee",
-    organizer: "ayesha.testnet",
+    organizer: ID("ayesha"),
     token: "",
     dao: null,
     dao_ready: true,
@@ -35,7 +48,7 @@ function sample(round: number): Committee {
     round_secs: 2592000,
     mode: "Draw",
     status: "Running",
-    round,
+    round: 2,
     round_started_ms: 0,
     members,
     bids: [],
@@ -48,39 +61,129 @@ function sample(round: number): Committee {
   };
 }
 
+const PLACES: [string, string][] = [
+  ["committee", "Pakistan"],
+  ["susu", "Ghana"],
+  ["tanda", "Mexico"],
+  ["chama", "Kenya"],
+  ["hui", "China"],
+  ["arisan", "Indonesia"],
+  ["paluwagan", "the Philippines"],
+];
+
+const WORLD: [string, string][] = [
+  ["Committee", "Pakistan"],
+  ["Susu", "Ghana"],
+  ["Tanda", "Mexico"],
+  ["Chama", "Kenya"],
+  ["Hui", "China"],
+  ["Arisan", "Indonesia"],
+  ["Paluwagan", "Philippines"],
+  ["Tontine", "Cameroon"],
+  ["Esusu", "Nigeria"],
+  ["Equb", "Ethiopia"],
+  ["Hagbad", "Somalia"],
+  ["Gameya", "Egypt"],
+  ["Stokvel", "South Africa"],
+  ["Kye", "Korea"],
+  ["Tanomoshi", "Japan"],
+  ["Partner", "Jamaica"],
+  ["Junta", "Peru"],
+];
+
+/** Counts up to a number when it first appears. */
+function CountUp({ to, format = (n: number) => n.toLocaleString("en-US") }: { to: number; format?: (n: number) => string }) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setV(to);
+    const start = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - start) / 1200);
+      setV(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return <>{format(v)}</>;
+}
+
 export default function Home() {
-  const [round, setRound] = useState(1);
-  const [count, setCount] = useState<number | null>(null);
+  const [step, setStep] = useState(0);
+  const [place, setPlace] = useState(0);
+  const [stats, setStats] = useState<{ circles: number; moved: bigint; members: number } | null>(null);
 
   useEffect(() => {
-    getConfig()
-      .then((c) => setCount(c.committees))
+    getCommittees(0, 200)
+      .then((cs) => {
+        const moved = cs.reduce(
+          (sum, c) => sum + c.events.filter((e) => e.kind === "Payout").reduce((s2, e) => s2 + BigInt(e.amount), 0n),
+          0n,
+        );
+        const members = new Set(cs.flatMap((c) => c.members.map((m) => m.account_id))).size;
+        setStats({ circles: cs.length, moved, members });
+      })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setStep(STORY.length - 1);
+      return;
+    }
+    const t = setTimeout(() => setStep((s) => (s + 1) % STORY.length), STORY[step].ms);
+    return () => clearTimeout(t);
+  }, [step]);
+
+  useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => setRound((r) => (r >= 5 ? 1 : r + 1)), 3600);
+    const t = setInterval(() => setPlace((p) => (p + 1) % PLACES.length), 2200);
     return () => clearInterval(t);
   }, []);
 
-  const circle = useMemo(() => sample(round), [round]);
-  const celebrate = round > 1 ? { accountId: `${NAMES[round - 2]}.testnet`, key: `r${round}` } : null;
+  const circle = useMemo(() => storyCircle(step), [step]);
+  const st = STORY[step];
+  const celebrate = st.winner ? { accountId: ID("sara"), key: `win-${step}` } : null;
+  const marks = st.mark ? { [ID("bilal")]: st.mark } : undefined;
+  const [word, country] = PLACES[place];
 
   return (
     <>
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-12 sm:pt-20 pb-16 grid gap-12 lg:grid-cols-[1.1fr_1fr] items-center">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-12 sm:pt-20 pb-12 grid gap-12 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-ink leading-[1.02]">
-            The savings circle nobody can run off with.
+          <h1 className="font-display text-[2.7rem] sm:text-6xl lg:text-[4.2rem] font-semibold text-ink leading-[1.03]">
+            <span className="rise block sm:whitespace-nowrap" style={{ animationDelay: "80ms" }}>
+              Everyone pays in.
+            </span>
+            <span className="rise block sm:whitespace-nowrap" style={{ animationDelay: "520ms" }}>
+              One takes it home.
+            </span>
+            <span className="rise block sm:whitespace-nowrap text-marigold" style={{ animationDelay: "960ms" }}>
+              Nobody runs off.
+            </span>
           </h1>
-          <p className="mt-6 text-lg sm:text-xl text-text max-w-xl">
-            Friends and family each pay in every month, and one of them takes the whole pot, until everyone has had a
-            turn. It&apos;s called a committee in Pakistan, a susu in Ghana, a tanda in Mexico, a chama in Kenya and a hui
-            in China.
+          <p className="rise mt-6 text-xl sm:text-2xl text-ink font-medium" style={{ animationDelay: "1400ms" }} aria-live="off">
+            It&apos;s called a{" "}
+            <span className="relative inline-block overflow-hidden align-bottom">
+              <span key={word} className="swap-in text-marigold">
+                {word}
+              </span>
+            </span>{" "}
+            in{" "}
+            <span className="relative inline-block overflow-hidden align-bottom">
+              <span key={country} className="swap-in">
+                {country}
+              </span>
+            </span>
+            .
           </p>
-          <p className="mt-4 text-lg sm:text-xl text-text max-w-xl">
-            Rota runs it on NEAR: the money sits in a vault no single person controls, and if someone stops paying, the
+          <p className="rise mt-4 text-lg text-text max-w-xl" style={{ animationDelay: "1600ms" }}>
+            Friends and family each pay in every month, and one of them takes the whole pot, until everyone has had a
+            turn. Rota runs it on NEAR: the money sits in a vault nobody controls, and if someone stops paying, the
             circle keeps going.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="rise mt-8 flex flex-wrap gap-3" style={{ animationDelay: "1800ms" }}>
             <Link href="/demo" className="btn btn-pot text-base">
               Try a demo circle
             </Link>
@@ -88,13 +191,96 @@ export default function Home() {
               Start your own
             </Link>
           </div>
-          <p className="mt-4 text-sm text-muted">
+          <p className="rise mt-4 text-sm text-muted" style={{ animationDelay: "1900ms" }}>
             The demo needs no wallet. Every step is a real transaction on NEAR testnet.
-            {count ? ` ${count} circles created so far.` : ""}
           </p>
         </div>
-        <div aria-hidden="false">
-          <Circle circle={circle} celebrate={celebrate} />
+        <div>
+          <Circle circle={circle} celebrate={celebrate} marks={marks} />
+          <p
+            key={st.text}
+            className="swap-in w-full text-center mt-3 text-lg font-semibold text-ink min-h-[3.5rem]"
+            aria-live="polite"
+          >
+            {st.text}
+          </p>
+        </div>
+      </section>
+
+      <section aria-label="Rota so far" className="mx-auto max-w-6xl px-4 sm:px-6 pb-14">
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-3xl overflow-hidden border border-rule bg-rule">
+          {[
+            ["Circles created", stats ? <CountUp key="c" to={stats.circles} /> : "…"],
+            ["Members", stats ? <CountUp key="m" to={stats.members} /> : "…"],
+            [
+              `Paid out (${TOKEN_SYMBOL})`,
+              stats ? <CountUp key="p" to={Number(stats.moved / 1_000_000n)} /> : "…",
+            ],
+            ["Run off with the money", <span key="z" className="text-paid">0</span>],
+          ].map(([label, value]) => (
+            <div key={label as string} className="bg-sheet px-5 py-6 sm:px-7 sm:py-7">
+              <dd className="font-display text-4xl sm:text-5xl font-semibold text-ink num">{value}</dd>
+              <dt className="mt-1 text-sm text-muted">{label}</dt>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-xs text-muted">Read live from the Rota contract on NEAR testnet.</p>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-20">
+        <h2 className="font-display text-3xl sm:text-4xl font-semibold text-ink max-w-3xl">
+          Circles run on trust. Until someone leaves with the money.
+        </h2>
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-rule overflow-hidden" style={{ boxShadow: "var(--shadow)" }}>
+            <div className="ruled h-full px-6 sm:px-8 pl-14 sm:pl-16 pt-8 pb-8 leading-[2rem]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#8a6d3b] leading-8">The old way</p>
+              <p className="font-semibold text-lg">Khan family committee — 50 a month</p>
+              <ul className="text-[15px]">
+                <li>Jan: Ayesha ✓ &nbsp;Bilal ✓ &nbsp;Sara ✓ &nbsp;Omar ✓</li>
+                <li>Feb: Ayesha ✓ &nbsp;Bilal ✓ &nbsp;Sara ✓ &nbsp;Omar ✓</li>
+                <li>Mar: Ayesha ✓ &nbsp;Bilal ✗ &nbsp;Sara ✓ &nbsp;Omar ✓</li>
+                <li className="line-through decoration-[#c2412d] decoration-2">Apr: organizer holding 600, not answering calls</li>
+              </ul>
+              <p className="mt-2 text-[#c2412d] font-semibold">The cash sits with one person, and the record is a notebook.</p>
+            </div>
+          </div>
+          <div className="rounded-3xl bg-band text-band-fg p-6 sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-marigold">With Rota</p>
+            <ul className="mt-4 space-y-4">
+              {[
+                ["The cash sits in a vault, not a pocket", "Each circle gets its own Sputnik DAO. Nobody, including the organizer, can take money out."],
+                ["Payouts follow the rules", "An on-chain draw, the agreed order or a bid decides who gets the pot. Anyone can re-check it."],
+                ["A missed payment doesn't sink the circle", "Early winners leave part of the pot behind as cover, and every member locks a deposit."],
+                ["The record is on-chain", "Who paid, who missed and who got paid lives on NEAR, not in a notebook anyone can lose."],
+              ].map(([t, d]) => (
+                <li key={t} className="flex gap-3">
+                  <span aria-hidden className="mt-1 h-5 w-5 shrink-0 rounded-full bg-marigold text-[#241a02] text-xs font-bold inline-flex items-center justify-center">
+                    ✓
+                  </span>
+                  <span>
+                    <span className="font-semibold block">{t}</span>
+                    <span className="opacity-75 text-[15px]">{d}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Names for savings circles around the world" className="border-y border-rule py-6 marquee-wrap overflow-hidden">
+        <p className="sr-only">The same idea has a name in dozens of countries.</p>
+        <div className="marquee" aria-hidden>
+          {[...WORLD, ...WORLD].map(([n, c], i) => (
+            <span key={i} className="flex items-baseline gap-2 px-6 whitespace-nowrap">
+              <span className="font-display text-2xl font-semibold text-ink">{n}</span>
+              <span className="text-sm text-muted">{c}</span>
+              <span className="ml-6 text-marigold" aria-hidden>
+                ●
+              </span>
+            </span>
+          ))}
         </div>
       </section>
 
