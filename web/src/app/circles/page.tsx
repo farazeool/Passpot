@@ -14,6 +14,8 @@ import { useWallet } from "@/lib/wallet";
 
 type Tab = "Open" | "Running" | "Finished" | "Mine";
 
+const MODE: Record<Committee["mode"], string> = { Draw: "Lucky draw", Order: "Agreed order", Bid: "Bidding" };
+
 const isDemoAccount = (id: string) => /-demo\./.test(id);
 const isDemo = (c: Committee) => isDemoAccount(c.organizer);
 
@@ -94,7 +96,22 @@ function CircleCard({ c, rep, live }: { c: Committee; rep?: Reputation; live?: b
             <h2 className="mt-2 font-display text-xl font-semibold text-ink leading-tight line-clamp-2">
               {circleName(c.name)}
             </h2>
-            <p className="mt-1 text-sm text-muted num">#{c.id}</p>
+            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+              <span className="num">#{c.id}</span>
+              <span aria-hidden>·</span>
+              <span>{MODE[c.mode]}</span>
+              {c.dao && (
+                <>
+                  <span className="basis-full inline-flex items-center gap-1 text-ink font-medium" title="Payments sit in this circle's own Sputnik DAO">
+                    <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5">
+                      <path d="M8 1.5 13.5 3.6v4.1c0 3.1-2.3 5.6-5.5 6.8C4.8 13.3 2.5 10.8 2.5 7.7V3.6Z" fill="var(--marigold)" />
+                      <path d="m5.6 8 1.7 1.7 3.2-3.4" stroke="#241a02" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    DAO vault
+                  </span>
+                </>
+              )}
+            </p>
           </div>
         </div>
 
@@ -220,7 +237,7 @@ export default function CommitteesPage() {
         <section className="mt-8" aria-label="Live demo circle">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
             <CircleCard c={live} rep={reps[live.organizer]} live />
-            <div className="lg:col-span-2 rounded-[1.25rem] border border-dashed border-rule-strong p-6 flex flex-col justify-center">
+            <div className="lg:col-span-2 rounded-[1.25rem] border border-dashed border-rule-strong p-6 sm:p-8 flex flex-col justify-center bg-band-soft">
               <p className="font-display text-xl font-semibold text-ink">Try one without a wallet</p>
               <p className="mt-2 text-text max-w-lg">
                 The live demo circle always has a round in progress. Act as Ayesha, Bilal or Sara, pay in, and close
