@@ -1,23 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { explainError, type Actor } from "@/lib/actions";
 import { saveProfile, type Gender, type Profile } from "@/lib/profile";
 import { Person } from "./Avatar";
 import { useToast } from "./Toast";
 
-/** Edit your profile. Saved to NEAR Social, so it follows you to other NEAR apps too. */
+const DRAFT = "rota.profile.draft";
+
+/** What someone typed before connecting a wallet; kept through the wallet's redirect. */
+export function readDraft(): Profile | null {
+  try {
+    const s = localStorage.getItem(DRAFT);
+    return s ? (JSON.parse(s) as Profile) : null;
+  } catch {
+    return null;
+  }
+}
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT);
+  } catch {}
+}
+
+/** Make or edit your profile. Without a wallet it keeps a draft and asks to connect at the end. */
 export function ProfileForm({
   actor,
   initial,
   onSaved,
   onCancel,
+  onConnect,
   first,
 }: {
-  actor: Actor;
+  actor: Actor | null;
   initial: Profile | null | undefined;
   onSaved: (p: Profile | null) => void;
   onCancel?: () => void;
+  onConnect?: () => void;
   first?: boolean;
 }) {
   const toast = useToast();
@@ -29,23 +48,33 @@ export function ProfileForm({
   const [image, setImage] = useState(initial?.image?.url ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const draft: Profile = { name, gender, location, saving_for: savingFor, description, image: { url: image } };
+  const draftKey = JSON.stringify(draft);
+
+  // Keep a draft while there's no wallet yet, so connecting doesn't lose anything.
+  useEffect(() => {
+    if (actor) return;
+    try {
+      localStorage.setItem(DRAFT, draftKey);
+    } catch {}
+  }, [actor, draftKey]);
 
   const imageOk = !image.trim() || /^https:\/\/\S+$/.test(image.trim());
   const valid = name.trim().length > 0 && name.length <= 48 && imageOk && !!gender;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!actor) {
+      try {
+        localStorage.setItem(DRAFT, draftKey);
+      } catch {}
+      return onConnect?.();
+    }
     setBusy(true);
     setError(null);
     try {
-      const p = await saveProfile(actor, {
-        name,
-        gender,
-        location,
-        saving_for: savingFor,
-        description,
-        image: { url: image },
-      });
+      const p = await saveProfile(actor, draft);
+      clearDraft();
       toast("Profile saved. Other members see it straight away.");
       onSaved(p);
     } catch (err) {
@@ -66,7 +95,7 @@ export function ProfileForm({
       <fieldset>
         <legend className="font-semibold text-ink text-sm mb-2">Your avatar</legend>
         <div className="flex flex-wrap items-center gap-3" role="radiogroup">
-          <Person id={actor.accountId} gender={gender} size={64} className="mr-1 transition-all" />
+          <Person id={actor?.accountId ?? "new-member"} gender={gender} size={64} className="mr-1 transition-all" />
           {(["male", "female"] as const).map((g) => (
             <button
               key={g}
@@ -76,7 +105,7 @@ export function ProfileForm({
               onClick={() => setGender(g)}
               className={`btn ${gender === g ? "btn-primary" : "btn-quiet"}`}
             >
-              <Person id={actor.accountId} gender={g} size={24} />
+              <Person id={actor?.accountId ?? "new-member"} gender={g} size={24} />
               {g === "male" ? "Male" : "Female"}
             </button>
           ))}
@@ -160,7 +189,7 @@ export function ProfileForm({
       <div className="flex flex-wrap items-center gap-3">
         <button className="btn btn-primary" type="submit" disabled={!valid || busy}>
           {busy && <span className="spinner" aria-hidden />}
-          {busy ? "Saving" : "Save profile"}
+          {busy ? "Saving" : actor ? "Save profile" : "Connect wallet to save"}
         </button>
         {onCancel && (
           <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
@@ -168,8 +197,9 @@ export function ProfileForm({
           </button>
         )}
         <p className="text-xs text-muted basis-full">
-          Saved on NEAR Social, the profile store NEAR apps share. Your wallet will ask you to approve a 0.1 NEAR
-          storage deposit the first time.
+          {actor
+            ? "Saved on NEAR Social, the profile store NEAR apps share. Your wallet will ask you to approve a 0.1 NEAR storage deposit the first time."
+            : "Your profile lives on your NEAR account, so the last step is connecting a wallet. What you've typed is kept while you do."}
         </p>
       </div>
     </form>

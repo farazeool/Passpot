@@ -103,15 +103,14 @@ export function Header() {
             </>
           ) : (
             <>
-              <button
-                onClick={signIn}
-                disabled={!ready}
+              <Link
+                href="/profile"
                 className="rounded-full hover:opacity-80 transition-opacity"
-                aria-label="Connect wallet to make your profile"
-                title="Connect wallet to make your profile"
+                aria-label="Create your profile"
+                title="Create your profile"
               >
                 <Person id="" size={34} />
-              </button>
+              </Link>
               <button className="btn btn-primary" onClick={signIn} disabled={!ready}>
                 Connect wallet
               </button>
@@ -126,11 +125,11 @@ export function Header() {
           </Link>
         ))}
       </nav>
-      {accountId && profile === null && !pathname?.startsWith("/u/") && (
+      {accountId && profile === null && !pathname?.startsWith("/u/") && !pathname?.startsWith("/profile") && (
         <div className="border-t border-rule bg-marigold-wash">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink">
             <span>Add your name so members know who you are.</span>
-            <Link href={`/u/${accountId}?edit=1`} className="font-semibold underline underline-offset-2">
+            <Link href="/profile" className="font-semibold underline underline-offset-2">
               Make your profile
             </Link>
           </div>
