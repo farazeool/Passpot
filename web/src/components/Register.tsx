@@ -21,7 +21,7 @@ export function Register({ circle: c }: { circle: Committee }) {
   }
   return (
     <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full min-w-[560px] border-collapse text-sm">
+      <table className="w-full min-w-[520px] border-collapse text-sm">
         <caption className="sr-only">Who paid in each round, and when each member received the pot</caption>
         <thead>
           <tr className="text-left text-muted">
@@ -36,7 +36,7 @@ export function Register({ circle: c }: { circle: Committee }) {
               </th>
             ))}
             <th scope="col" className="font-medium py-2 px-3 text-right">Received</th>
-            <th scope="col" className="font-medium py-2 pl-3 pr-4 sm:pr-0 text-right">Still locked</th>
+            <th scope="col" className="font-medium py-2 pl-3 pr-4 sm:pr-0 text-right">Locked</th>
           </tr>
         </thead>
         <tbody>
@@ -55,7 +55,7 @@ export function Register({ circle: c }: { circle: Committee }) {
                     <td key={i} className="px-1 py-1.5 text-center">
                       <span
                         title={pot ? `Received the pot in round ${i + 1}` : CELL[cell].label}
-                        className={`inline-flex items-center justify-center gap-1 min-w-[4.5rem] h-7 rounded-full text-xs font-semibold ${CELL[cell].className} ${
+                        className={`inline-flex items-center justify-center gap-1 min-w-[3.9rem] h-7 rounded-full text-xs font-semibold ${CELL[cell].className} ${
                           pot ? "ring-2 ring-marigold" : ""
                         }`}
                       >
@@ -76,7 +76,7 @@ export function Register({ circle: c }: { circle: Committee }) {
         </tbody>
       </table>
       <p className="mt-3 px-4 sm:px-0 text-xs text-muted">
-        Amounts in {TOKEN_SYMBOL}. A marigold ring marks the round a member received the pot. Still locked is the
+        Amounts in {TOKEN_SYMBOL}. A marigold ring marks the round a member received the pot. Locked is the
         member&apos;s deposit plus holdback, returned when the circle ends.
       </p>
     </div>

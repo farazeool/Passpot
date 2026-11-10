@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Actions } from "@/components/Actions";
 import { Activity } from "@/components/Activity";
 import { Circle } from "@/components/Circle";
+import { SoundToggle } from "@/components/SoundToggle";
 import { Register } from "@/components/Register";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
@@ -107,6 +108,7 @@ function CommitteePageInner() {
           </p>
         </div>
         <div className="flex gap-2">
+          <SoundToggle />
           <Link href={`/c/${c.id}/verify`} className="btn btn-quiet">
             Verify on-chain
           </Link>
@@ -134,9 +136,9 @@ function CommitteePageInner() {
         </section>
       )}
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,420px)_1fr] items-start">
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,460px)_1fr] items-start">
         <div className="lg:sticky lg:top-24">
-          <Circle circle={c} celebrate={celebrate} />
+          <Circle circle={c} celebrate={celebrate} sound />
         </div>
 
         <div className="space-y-10 min-w-0">
