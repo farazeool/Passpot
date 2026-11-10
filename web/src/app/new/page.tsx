@@ -3,7 +3,7 @@
 import { useTitle } from "@/lib/useTitle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createCommittee, explainError } from "@/lib/actions";
 import { DAO_DEPOSIT_NEAR, TOKEN_SYMBOL } from "@/lib/config";
 import { duration, money, toBase } from "@/lib/format";
@@ -78,6 +78,15 @@ function preview(name: string, amount: bigint, size: number, roundSecs: number, 
   } as unknown as Committee;
 }
 
+const PRESETS: { label: string; hint: string; amount: string; size: number; secs: number; mode: PayoutMode }[] = [
+  { label: "Family", hint: "5 people · 50 a month", amount: "50", size: 5, secs: 2592000, mode: "Draw" },
+  { label: "Friends", hint: "4 people · 25 a week", amount: "25", size: 4, secs: 604800, mode: "Order" },
+  { label: "Market traders", hint: "8 people · 20 a day, bidding", amount: "20", size: 8, secs: 86400, mode: "Bid" },
+  { label: "Quick test", hint: "3 people · rounds of 2 minutes", amount: "10", size: 3, secs: 120, mode: "Draw" },
+];
+
+const DRAFT = "rota.new.draft";
+
 export default function NewCommitteePage() {
   useTitle("Start a circle");
   const router = useRouter();
@@ -90,6 +99,34 @@ export default function NewCommitteePage() {
   const [withDao, setWithDao] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  // Keep what was typed through the wallet's sign-in redirect.
+  useEffect(() => {
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAFT) ?? "null");
+      if (!d) return;
+      setName(d.name ?? "");
+      setAmount(d.amount ?? "50");
+      setSize(d.size ?? 5);
+      setRoundSecs(d.roundSecs ?? 2592000);
+      setMode(d.mode ?? "Draw");
+      setWithDao(d.withDao ?? true);
+    } catch {
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(DRAFT, JSON.stringify({ name, amount, size, roundSecs, mode, withDao }));
+    } catch {}
+  }, [loaded, name, amount, size, roundSecs, mode, withDao]);
+
+  const nameError = touched && !name.trim() ? "Give the circle a name members will recognise." : null;
+  const amountError = touched && !(Number(amount) > 0) ? "Enter an amount above zero." : null;
 
   const valid = name.trim().length > 0 && name.length <= 64 && Number(amount) > 0 && size >= 2 && size <= 20;
   const base = valid ? toBase(amount) : 0n;
@@ -98,12 +135,17 @@ export default function NewCommitteePage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setTouched(true);
     if (!actor) return signIn();
+    if (!valid) return;
     setBusy(true);
     setError(null);
     try {
       const id = await createCommittee(actor, { name: name.trim(), amount: base, size, roundSecs, mode, withDao });
-      router.push(id ? `/c/${id}` : "/circles");
+      try {
+        localStorage.removeItem(DRAFT);
+      } catch {}
+      router.push(id ? `/c/${id}?created=1` : "/circles");
     } catch (err) {
       setError(explainError(err));
       setBusy(false);
@@ -118,7 +160,36 @@ export default function NewCommitteePage() {
         Set the rules once. After that, nobody — including you — can change who gets paid or move the money.
       </p>
 
-      <form onSubmit={submit} className="mt-10 space-y-8">
+      <form onSubmit={submit} className="mt-10 space-y-8" noValidate>
+        <div>
+          <p className="font-semibold text-ink">Start from a common setup</p>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {PRESETS.map((p) => {
+              const on = amount === p.amount && size === p.size && roundSecs === p.secs && mode === p.mode;
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    setAmount(p.amount);
+                    setSize(p.size);
+                    setRoundSecs(p.secs);
+                    setMode(p.mode);
+                    if (p.secs === 120) setWithDao(false);
+                  }}
+                  className={`text-left rounded-2xl border px-3.5 py-3 transition-colors ${
+                    on ? "border-ink bg-sheet" : "border-rule hover:border-rule-strong"
+                  }`}
+                >
+                  <span className="block font-semibold text-ink text-sm">{p.label}</span>
+                  <span className="block text-xs text-muted mt-0.5">{p.hint}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label htmlFor="name" className="font-semibold text-ink block">
             Name
@@ -130,8 +201,16 @@ export default function NewCommitteePage() {
             value={name}
             maxLength={64}
             onChange={(e) => setName(e.target.value)}
+            onBlur={() => name && setTouched(true)}
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? "name-err" : undefined}
             required
           />
+          {nameError && (
+            <p id="name-err" className="text-sm text-missed">
+              {nameError}
+            </p>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-6">
@@ -146,24 +225,49 @@ export default function NewCommitteePage() {
                 inputMode="decimal"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                aria-invalid={!!amountError}
                 required
               />
               <span className="text-muted">{TOKEN_SYMBOL}</span>
             </div>
+            {amountError && <p className="text-sm text-missed">{amountError}</p>}
           </div>
           <div className="space-y-2">
             <label htmlFor="size" className="font-semibold text-ink block">
               Members
             </label>
-            <input
-              id="size"
-              type="number"
-              min={2}
-              max={20}
-              className="field num"
-              value={size}
-              onChange={(e) => setSize(Math.max(2, Math.min(20, Number(e.target.value) || 2)))}
-            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-quiet shrink-0 text-lg"
+                style={{ width: 44, height: 44, minHeight: 44, padding: 0 }}
+                onClick={() => setSize(Math.max(2, size - 1))}
+                disabled={size <= 2}
+                aria-label="One fewer member"
+              >
+                −
+              </button>
+              <input
+                id="size"
+                type="number"
+                min={2}
+                max={20}
+                className="field num text-center"
+                value={size}
+                onChange={(e) => setSize(Math.max(2, Math.min(20, Number(e.target.value) || 2)))}
+              />
+              <button
+                type="button"
+                className="btn btn-quiet shrink-0 text-lg"
+                style={{ width: 44, height: 44, minHeight: 44, padding: 0 }}
+                onClick={() => setSize(Math.min(20, size + 1))}
+                disabled={size >= 20}
+                aria-label="One more member"
+              >
+                +
+              </button>
+            </div>
+            <p className="text-xs text-muted">Including you. Between 2 and 20.</p>
           </div>
         </div>
 
@@ -222,7 +326,7 @@ export default function NewCommitteePage() {
         </label>
 
         {valid && (
-          <p className="rounded-2xl bg-marigold-wash border border-marigold/40 p-4 text-text">
+          <p className="lg:hidden rounded-2xl bg-marigold-wash border border-marigold/40 p-4 text-text">
             Each round&apos;s pot: <strong className="num">{money(base * BigInt(size))} {TOKEN_SYMBOL}</strong>. Every member
             also locks a <span className="num">{money(base)} {TOKEN_SYMBOL}</span> deposit when joining, returned at the end.
           </p>
@@ -288,9 +392,9 @@ export default function NewCommitteePage() {
           <p className="font-display text-lg font-semibold text-ink">What happens next</p>
           <ol className="mt-3 space-y-3">
             {[
+              ["Take your seat", `Creating the circle doesn't put you in it. Join first, like everyone else, by locking a ${money(each)} ${TOKEN_SYMBOL} deposit. It comes back at the end.`],
               ["Share the invite", "You get a link to send on WhatsApp. Anyone with a NEAR account can join until the seats are full."],
-              ["Members lock a deposit", `Each pays a ${money(each)} ${TOKEN_SYMBOL} deposit when joining. It covers a missed payment and comes back at the end.`],
-              ["You start round 1", `Then everyone pays ${money(each)} ${TOKEN_SYMBOL} every ${duration(roundSecs)}, and one member takes the pot each round.`],
+              ["Start round 1", `Once every seat is taken, you start the circle. Everyone pays ${money(each)} ${TOKEN_SYMBOL} every ${duration(roundSecs)}, and one member takes the pot each round.`],
             ].map(([t, d], i) => (
               <li key={t} className="flex gap-3">
                 <span className="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-marigold-wash border border-marigold/50 text-xs font-semibold text-ink inline-flex items-center justify-center num">

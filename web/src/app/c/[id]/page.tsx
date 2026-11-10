@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Actions } from "@/components/Actions";
 import { Activity } from "@/components/Activity";
@@ -33,6 +33,7 @@ function CommitteePageInner() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
   const { actor: walletActor, signIn } = useWallet();
+  const justCreated = useSearchParams().get("created") === "1";
   const [c, setC] = useState<Committee | null | undefined>(undefined);
   const [demo, setDemo] = useState<DemoInfo | null>(null);
   const [persona, setPersona] = useState<string | null>(null);
@@ -167,6 +168,34 @@ function CommitteePageInner() {
           </Link>
         </div>
       </div>
+
+      {justCreated && c.status === "Open" && (
+        <section className="mt-8 rounded-[1.25rem] border border-marigold/60 bg-marigold-wash p-5 sm:p-6 toast" aria-label="Your circle is live">
+          <p className="font-display text-2xl font-semibold text-ink">Your circle is live.</p>
+          <ol className="mt-3 grid gap-3 sm:grid-cols-3 text-text">
+            {[
+              [
+                "Take your seat",
+                c.members.some((m) => m.account_id === walletActor?.accountId)
+                  ? "Done. You're in."
+                  : `Press "Join and lock" below to put down your ${money(c.amount)} ${TOKEN_SYMBOL} deposit.`,
+              ],
+              ["Invite people", "Send the link on WhatsApp to the people you want in the circle."],
+              ["Start round 1", "When every seat is taken, the Start button appears for you."],
+            ].map(([t, d], i) => (
+              <li key={t} className="flex gap-3">
+                <span className="h-6 w-6 shrink-0 rounded-full bg-ink text-paper text-xs font-semibold inline-flex items-center justify-center num">
+                  {i + 1}
+                </span>
+                <span>
+                  <span className="font-semibold text-ink block">{t}</span>
+                  <span className="text-sm">{d}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {isDemo && demo && (
         <section id="tour-members" className="mt-8 card p-4 sm:p-5" aria-label="Demo members">
