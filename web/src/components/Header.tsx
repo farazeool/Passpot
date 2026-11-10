@@ -52,9 +52,9 @@ export function Header() {
   }
 
   const nav = [
+    { href: "/", label: "Home" },
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
-    { href: "/#faq", label: "Questions" },
   ];
 
   return (
@@ -70,7 +70,7 @@ export function Header() {
               key={n.href}
               href={n.href}
               className={`px-3 py-2 rounded-full text-sm font-medium ${
-                pathname?.startsWith(n.href) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
+                (n.href === "/" ? pathname === "/" : pathname?.startsWith(n.href)) ? "text-ink bg-sheet border border-rule" : "text-muted hover:text-ink"
               }`}
             >
               {n.label}
