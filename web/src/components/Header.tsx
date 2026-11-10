@@ -55,6 +55,7 @@ export function Header() {
     { href: "/", label: "Home" },
     { href: "/circles", label: "Circles" },
     { href: "/new", label: "Start a circle" },
+    ...(accountId ? [{ href: "/money", label: "Your money" }] : []),
   ];
 
   return (

@@ -12,6 +12,7 @@ import { Copy } from "@/components/Copy";
 import { Tour, tourDone, type TourStep } from "@/components/Tour";
 import { useTitle } from "@/lib/useTitle";
 import { Invite, Remind } from "@/components/Share";
+import { CalendarButtons } from "@/components/CalendarButtons";
 import { Register } from "@/components/Register";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
@@ -242,6 +243,10 @@ function CommitteePageInner() {
 
           {c.status === "Open" && c.members.length < c.size && <Invite circle={c} />}
           {c.status === "Running" && <Remind circle={c} now={now} />}
+          {!isDemo && walletActor && (() => {
+            const me = c.members.find((m) => m.account_id === walletActor.accountId);
+            return me ? <CalendarButtons circle={c} unpaid={!me.paid_this_round} /> : null;
+          })()}
 
           {latestPayout && (
             <section aria-labelledby="latest" className="rounded-2xl bg-marigold-wash border border-marigold/40 p-5 sm:p-6">
