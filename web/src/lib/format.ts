@@ -37,9 +37,14 @@ export function displayName(accountId: string): string {
 
 export function duration(secs: number): string {
   if (secs < 60) return `${secs} seconds`;
-  if (secs < 3600) return `${Math.round(secs / 60)} minute${secs >= 120 ? "s" : ""}`;
-  if (secs < 86400 * 2) return `${Math.round(secs / 3600)} hours`;
-  if (secs < 86400 * 27) return `${Math.round(secs / 86400)} days`;
+  if (secs < 3600) {
+    const m = Math.round(secs / 60);
+    return secs % 60 === 0 ? `${m} minute${m === 1 ? "" : "s"}` : `${(secs / 60).toFixed(1)} minutes`;
+  }
+  const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+  if (secs < 86400) return plural(Math.round(secs / 3600), "hour");
+  if (secs < 86400 * 7) return plural(Math.round(secs / 86400), "day");
+  if (secs < 86400 * 27) return plural(Math.round(secs / 604800), "week");
   return `${Math.round(secs / (86400 * 30))} month${secs >= 86400 * 45 ? "s" : ""}`;
 }
 

@@ -127,7 +127,7 @@ export async function runChecks(c: Committee): Promise<Check[]> {
         detail:
           payoutEvents.length === 0
             ? "No payouts yet."
-            : `${items.filter((i) => i.ok).length} of ${items.length} payout${items.length === 1 ? "" : "s"} match an approved Transfer proposal. ${
+            : `${items.filter((i) => i.ok).length} of ${items.length} payout${items.length === 1 ? " matches" : "s match"} an approved Transfer proposal. ${
                 unexplained.length ? `${unexplained.length} transfer proposal(s) don't match any payout.` : "No other transfers left the DAO."
               }`,
         items,

@@ -25,6 +25,10 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
   const isOrganizer = actor?.accountId === c.organizer;
   const amount = `${money(c.amount)} ${TOKEN_SYMBOL}`;
   const ended = now >= c.round_ends_ms;
+  // In the demo, speak about the member being played; with a wallet, speak to the person.
+  const who = actor?.kind === "demo" ? displayName(actor.accountId) : null;
+  const youHave = who ? `${who} has` : "You've";
+  const yourSub = who ? `${who}'s` : "Your";
 
   async function run(label: string, fn: () => Promise<unknown>) {
     setBusy(label);
@@ -77,7 +81,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
     } else if (me && c.members.length < c.size) {
       items.push(
         <p key="wait">
-          You&apos;re in. Waiting for {c.size - c.members.length} more member{c.size - c.members.length === 1 ? "" : "s"}
+          {who ? `${who} is in.` : "You're in."} Waiting for {c.size - c.members.length} more member{c.size - c.members.length === 1 ? "" : "s"}
           {isOrganizer ? " — share the link with them." : "."}
         </p>,
       );
@@ -99,14 +103,14 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
       items.push(
         <div key="pay" className="space-y-2">
           <p>
-            Your round {c.round} payment of <strong className="num">{amount}</strong> is due
+            {yourSub} round {c.round} payment of <strong className="num">{amount}</strong> is due
             {ended ? " — the round has ended, so it may be covered from your holdback." : ` in ${countdown(c.round_ends_ms - now)}.`}
           </p>
           {btn(`Pay ${amount}`, "Paying…", () => act.contribute(actor, c))}
         </div>,
       );
     } else if (me) {
-      items.push(<p key="paid">You&apos;ve paid for round {c.round}.</p>);
+      items.push(<p key="paid">{youHave} paid for round {c.round}.</p>);
     }
     if (c.mode === "Bid" && me && me.paid_out_round == null) {
       const myBid = c.bids.find(([i]) => c.members[i]?.account_id === me.account_id);
@@ -170,7 +174,7 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
         </div>,
       );
     } else if (me) {
-      items.push(<p key="claimed">You&apos;ve claimed everything. This circle is complete.</p>);
+      items.push(<p key="claimed">{youHave} claimed everything. This circle is complete.</p>);
     } else {
       items.push(<p key="done">This circle is complete.</p>);
     }

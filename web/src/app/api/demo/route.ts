@@ -2,7 +2,7 @@
 // Rota without a wallet. Testnet only: the demo accounts hold nothing but
 // test dollars and a little test NEAR for fees. Only Rota and testUSD
 // calls are allowed, and only the ones the app itself makes.
-import { Account, FailoverRpcProvider, JsonRpcProvider, KeyPairSigner, type KeyPairString } from "near-api-js";
+import { Account, JsonRpcProvider, KeyPairSigner, type KeyPairString } from "near-api-js";
 import { CONTRACT, DAO_DEPOSIT_NEAR, RPC_URLS, TOKEN } from "@/lib/config";
 import { readOutcome } from "@/lib/outcome";
 
@@ -20,8 +20,13 @@ function demoAccounts(): DemoAccount[] {
   }
 }
 
-const provider = () =>
-  new FailoverRpcProvider(RPC_URLS.map((url) => new JsonRpcProvider({ url })));
+// A single provider, so contract errors come back as they are (a failover
+// provider reports any failure as "exceeded providers"). The second URL is
+// used only when the first can't be reached.
+let rpcIndex = 0;
+const provider = () => new JsonRpcProvider({ url: RPC_URLS[rpcIndex % RPC_URLS.length] });
+const isNetworkError = (e: unknown) =>
+  /fetch failed|ECONN|ETIMEDOUT|ENOTFOUND|socket|429|502|503|504/i.test(e instanceof Error ? e.message : String(e));
 
 const NEAR = 10n ** 24n;
 const DAO_DEPOSIT = BigInt(DAO_DEPOSIT_NEAR) * NEAR;
@@ -111,19 +116,27 @@ export async function POST(req: Request) {
     return reject("Demo members can only use Rota and testUSD.");
   }
 
-  try {
-    const account = new Account(signer.id, provider(), KeyPairSigner.fromSecretKey(signer.key));
-    const outcome = await account.callFunctionRaw({
-      contractId: receiverId,
-      methodName,
-      args,
-      deposit,
-      gas: BigInt(gasTgas) * 1_000_000_000_000n,
-      waitUntil: "EXECUTED_OPTIMISTIC",
-    });
-    return Response.json(readOutcome(outcome));
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return reject(message, 422);
+  for (let attempt = 0; attempt < RPC_URLS.length; attempt++) {
+    try {
+      const account = new Account(signer.id, provider(), KeyPairSigner.fromSecretKey(signer.key));
+      const outcome = await account.callFunctionRaw({
+        contractId: receiverId,
+        methodName,
+        args,
+        deposit,
+        gas: BigInt(gasTgas) * 1_000_000_000_000n,
+        waitUntil: "EXECUTED_OPTIMISTIC",
+      });
+      return Response.json(readOutcome(outcome));
+    } catch (e) {
+      if (isNetworkError(e) && attempt + 1 < RPC_URLS.length) {
+        rpcIndex++;
+        continue;
+      }
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("demo call failed", methodName, message);
+      return reject(message, 422);
+    }
   }
+  return reject("NEAR RPC is unreachable right now. Try again in a moment.", 503);
 }
