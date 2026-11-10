@@ -71,25 +71,6 @@ const PLACES: [string, string][] = [
   ["paluwagan", "the Philippines"],
 ];
 
-const WORLD: [string, string][] = [
-  ["Committee", "Pakistan"],
-  ["Susu", "Ghana"],
-  ["Tanda", "Mexico"],
-  ["Chama", "Kenya"],
-  ["Hui", "China"],
-  ["Arisan", "Indonesia"],
-  ["Paluwagan", "Philippines"],
-  ["Tontine", "Cameroon"],
-  ["Esusu", "Nigeria"],
-  ["Equb", "Ethiopia"],
-  ["Hagbad", "Somalia"],
-  ["Gameya", "Egypt"],
-  ["Stokvel", "South Africa"],
-  ["Kye", "Korea"],
-  ["Tanomoshi", "Japan"],
-  ["Partner", "Jamaica"],
-  ["Junta", "Peru"],
-];
 
 /** Counts up to a number when it first appears. */
 function CountUp({ to, format = (n: number) => n.toLocaleString("en-US") }: { to: number; format?: (n: number) => string }) {
@@ -269,21 +250,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section aria-label="Names for savings circles around the world" className="border-y border-rule py-6 marquee-wrap overflow-hidden">
-        <p className="sr-only">The same idea has a name in dozens of countries.</p>
-        <div className="marquee" aria-hidden>
-          {[...WORLD, ...WORLD].map(([n, c], i) => (
-            <span key={i} className="flex items-baseline gap-2 px-6 whitespace-nowrap">
-              <span className="font-display text-2xl font-semibold text-ink">{n}</span>
-              <span className="text-sm text-muted">{c}</span>
-              <span className="ml-6 text-marigold" aria-hidden>
-                ●
-              </span>
-            </span>
-          ))}
-        </div>
-      </section>
-
       <section className="border-y border-rule bg-band-soft">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
           <h2 className="font-display text-3xl sm:text-4xl font-semibold text-ink max-w-2xl">How a round works</h2>
@@ -359,9 +325,14 @@ export default function Home() {
               Every circle has a Verify page that re-checks the vault, every payout and every draw in your browser,
               straight from the chain.
             </p>
-            <Link href="/circles" className="btn btn-pot">
-              See circles and verify one
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/demo" className="btn btn-pot">
+                Try a demo circle
+              </Link>
+              <Link href="/circles" className="btn btn-quiet">
+                See circles and verify one
+              </Link>
+            </div>
           </div>
         </div>
       </section>
