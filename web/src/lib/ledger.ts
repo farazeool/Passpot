@@ -1,4 +1,4 @@
-// Derive the register (who paid what, when) from a committee's on-chain events.
+// Derive the register (who paid what, when) from a circle's on-chain events.
 import type { Committee, CommitteeEvent } from "./types";
 
 export type Cell = "paid" | "covered" | "missed" | "due" | "future" | "none";

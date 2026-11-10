@@ -74,15 +74,15 @@ function CommitteePageInner() {
   const actor: Actor | null = isDemo && persona ? demoActor(persona) : walletActor;
 
   if (c === undefined) {
-    return <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 text-muted">Reading the committee from NEAR…</div>;
+    return <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 text-muted">Reading the circle from NEAR…</div>;
   }
   if (c === null) {
     return (
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 space-y-3">
-        <h1 className="font-display text-3xl font-semibold text-ink">Committee #{id} doesn&apos;t exist</h1>
-        <p className="text-muted">Check the link, or see all committees.</p>
-        <Link href="/committees" className="btn btn-quiet">
-          See all committees
+        <h1 className="font-display text-3xl font-semibold text-ink">Circle #{id} doesn&apos;t exist</h1>
+        <p className="text-muted">Check the link, or see all circles.</p>
+        <Link href="/circles" className="btn btn-quiet">
+          See all circles
         </Link>
       </div>
     );
@@ -98,7 +98,7 @@ function CommitteePageInner() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted">
-            Committee #{c.id}, organized by {displayName(c.organizer)}
+            Circle #{c.id}, organized by {displayName(c.organizer)}
           </p>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">{c.name}</h1>
           <p className="mt-2 text-muted">
@@ -116,7 +116,7 @@ function CommitteePageInner() {
       {isDemo && demo && (
         <section className="mt-8 rounded-2xl border border-ink/15 bg-sheet p-4 sm:p-5" aria-label="Demo members">
           <p className="text-sm text-muted mb-3">
-            Demo committee. Act as any member — every action is a real NEAR testnet transaction, signed for you.
+            Demo circle. Act as any member — every action is a real NEAR testnet transaction, signed for you.
           </p>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Act as">
             {demo.members.map((m) => (
@@ -136,7 +136,7 @@ function CommitteePageInner() {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,420px)_1fr] items-start">
         <div className="lg:sticky lg:top-24">
-          <Circle committee={c} celebrate={celebrate} />
+          <Circle circle={c} celebrate={celebrate} />
         </div>
 
         <div className="space-y-10 min-w-0">
@@ -144,7 +144,7 @@ function CommitteePageInner() {
             <h2 id="todo" className="font-display text-xl font-semibold text-ink mb-3">
               {actor ? `What ${isDemo ? displayName(actor.accountId) : "you"} can do` : "Take part"}
             </h2>
-            <Actions committee={c} actor={actor} onDone={load} onSignIn={signIn} now={now} />
+            <Actions circle={c} actor={actor} onDone={load} onSignIn={signIn} now={now} />
           </section>
 
           {latestPayout && (
@@ -174,7 +174,7 @@ function CommitteePageInner() {
             <h2 id="register" className="font-display text-2xl font-semibold text-ink mb-4">
               Register
             </h2>
-            <Register committee={c} />
+            <Register circle={c} />
           </section>
 
           <section aria-labelledby="vault">
@@ -183,16 +183,16 @@ function CommitteePageInner() {
             </h2>
             {c.dao ? (
               <p className="text-text">
-                In this committee&apos;s own Sputnik DAO,{" "}
+                In this circle&apos;s own Sputnik DAO,{" "}
                 <a className="link break-all" href={explorerAccount(c.dao)} target="_blank" rel="noreferrer">
                   {c.dao}
                 </a>
-                . Its only council member is the Committee contract, so no person — not even the organizer — can move
+                . Its only council member is the Rota contract, so no person — not even the organizer — can move
                 it. It should hold <strong className="num">{money(c.held)} {TOKEN_SYMBOL}</strong> right now.
               </p>
             ) : (
               <p className="text-text">
-                Held by the Committee contract itself (a test committee without its own DAO):{" "}
+                Held by the Rota contract itself (a test circle without its own DAO):{" "}
                 <strong className="num">{money(c.held)} {TOKEN_SYMBOL}</strong>.
               </p>
             )}
@@ -202,7 +202,7 @@ function CommitteePageInner() {
             <h2 id="activity" className="font-display text-2xl font-semibold text-ink mb-2">
               Activity
             </h2>
-            <Activity committee={c} />
+            <Activity circle={c} />
           </section>
         </div>
       </div>

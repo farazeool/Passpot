@@ -49,24 +49,24 @@ export async function runChecks(c: Committee): Promise<Check[]> {
         return Array.isArray(k?.Group) && k.Group.length === 1 && k.Group[0] === CONTRACT;
       });
       checks.push({
-        title: "Only the committee's rules can move the money",
+        title: "Only the circle's rules can move the money",
         ok: movers.length > 0 && onlyContract,
         detail: onlyContract
-          ? `The DAO's only member with power to approve payments is the Committee contract (${CONTRACT}). Everyone else can only file non-binding polls.`
-          : "The DAO policy gives payment power to someone other than the Committee contract.",
+          ? `The DAO's only member with power to approve payments is the Rota contract (${CONTRACT}). Everyone else can only file non-binding polls.`
+          : "The DAO policy gives payment power to someone other than the Rota contract.",
         items: policy.roles.map((r) => ({
           ok: true,
           text: `Role "${r.name}": ${JSON.stringify(r.kind)} can ${r.permissions.join(", ")}`,
         })),
       });
     } catch (e) {
-      checks.push({ title: "Only the committee's rules can move the money", ok: false, detail: `Couldn't read the DAO policy: ${e}` });
+      checks.push({ title: "Only the circle's rules can move the money", ok: false, detail: `Couldn't read the DAO policy: ${e}` });
     }
   } else {
     checks.push({
-      title: "Only the committee's rules can move the money",
+      title: "Only the circle's rules can move the money",
       ok: null,
-      detail: "This is a test committee without its own DAO; the Committee contract holds its money directly.",
+      detail: "This is a test circle without its own DAO; the Rota contract holds its money directly.",
     });
   }
 
@@ -77,7 +77,7 @@ export async function runChecks(c: Committee): Promise<Check[]> {
   checks.push({
     title: "Every unit is accounted for",
     ok: paidIn - paidOut === held,
-    detail: `Paid in ${money(paidIn)} ${TOKEN_SYMBOL} (deposits and contributions) − paid out ${money(paidOut)} ${TOKEN_SYMBOL} (pots and claims) = ${money(paidIn - paidOut)} ${TOKEN_SYMBOL}. The committee's records say it holds ${money(held)} ${TOKEN_SYMBOL}.`,
+    detail: `Paid in ${money(paidIn)} ${TOKEN_SYMBOL} (deposits and contributions) − paid out ${money(paidOut)} ${TOKEN_SYMBOL} (pots and claims) = ${money(paidIn - paidOut)} ${TOKEN_SYMBOL}. The circle's records say it holds ${money(held)} ${TOKEN_SYMBOL}.`,
   });
 
   // 3. The vault really holds it.
@@ -88,7 +88,7 @@ export async function runChecks(c: Committee): Promise<Check[]> {
       checks.push({
         title: "The DAO really holds it",
         ok: balance === expected,
-        detail: `${TOKEN} reports the DAO's balance as ${money(balance)} ${TOKEN_SYMBOL}; the committee expects ${money(expected)} ${TOKEN_SYMBOL}.`,
+        detail: `${TOKEN} reports the DAO's balance as ${money(balance)} ${TOKEN_SYMBOL}; the circle expects ${money(expected)} ${TOKEN_SYMBOL}.`,
       });
     } catch (e) {
       checks.push({ title: "The DAO really holds it", ok: false, detail: `Couldn't read the balance: ${e}` });

@@ -57,7 +57,7 @@ export default function NewCommitteePage() {
     setError(null);
     try {
       const id = await createCommittee(actor, { name: name.trim(), amount: base, size, roundSecs, mode, withDao });
-      router.push(id ? `/c/${id}` : "/committees");
+      router.push(id ? `/c/${id}` : "/circles");
     } catch (err) {
       setError(explainError(err));
       setBusy(false);
@@ -66,7 +66,7 @@ export default function NewCommitteePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10 sm:py-14">
-      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Start a committee</h1>
+      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Start a circle</h1>
       <p className="mt-3 text-text">
         Set the rules once. After that, nobody — including you — can change who gets paid or move the money.
       </p>
@@ -168,7 +168,7 @@ export default function NewCommitteePage() {
             <span className="font-semibold text-ink">Keep the money in its own Sputnik DAO</span>
             <span className="block text-sm text-muted">
               Costs {DAO_DEPOSIT_NEAR} test NEAR for the DAO&apos;s storage. Every payment goes into the DAO, and payouts
-              leave only through DAO proposals approved by the committee&apos;s rules. Untick for a quick test committee
+              leave only through DAO proposals approved by the circle&apos;s rules. Untick for a quick test circle
               held by the contract.
             </span>
           </span>
@@ -190,7 +190,7 @@ export default function NewCommitteePage() {
         <div className="flex flex-wrap gap-3 items-center">
           {actor ? (
             <button className="btn btn-pot" type="submit" disabled={!valid || busy}>
-              {busy ? "Creating…" : "Create committee"}
+              {busy ? "Creating…" : "Create circle"}
             </button>
           ) : (
             <button className="btn btn-primary" type="button" onClick={signIn}>

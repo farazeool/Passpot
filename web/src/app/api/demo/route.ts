@@ -1,6 +1,6 @@
 // Signs transactions for the ready-made demo members, so anyone can try
-// Committee without a wallet. Testnet only: the demo accounts hold nothing but
-// test dollars and a little test NEAR for fees. Only Committee and testUSD
+// Rota without a wallet. Testnet only: the demo accounts hold nothing but
+// test dollars and a little test NEAR for fees. Only Rota and testUSD
 // calls are allowed, and only the ones the app itself makes.
 import { Account, FailoverRpcProvider, JsonRpcProvider, KeyPairSigner, type KeyPairString } from "near-api-js";
 import { CONTRACT, DAO_DEPOSIT_NEAR, RPC_URLS, TOKEN } from "@/lib/config";
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       if (deposit !== 0n) return reject("No deposit allowed.");
     } else if (methodName === "ft_transfer_call") {
       if (deposit !== 1n) return reject("Token transfers attach exactly 1 yoctoNEAR.");
-      if (args.receiver_id !== CONTRACT) return reject("Demo members can only pay into Committee.");
+      if (args.receiver_id !== CONTRACT) return reject("Demo members can only pay into Rota.");
     } else {
       return reject("Not allowed in the demo.");
     }
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       return reject("No deposit allowed.");
     }
   } else {
-    return reject("Demo members can only use Committee and testUSD.");
+    return reject("Demo members can only use Rota and testUSD.");
   }
 
   try {

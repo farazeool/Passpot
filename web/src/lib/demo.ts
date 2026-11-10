@@ -33,7 +33,7 @@ export function demoActor(accountId: string): Actor {
   };
 }
 
-const KEY = "committee.demo";
+const KEY = "circle.demo";
 
 /** Committees created through the demo, newest first, remembered per browser. */
 export function rememberDemoCommittee(id: number) {

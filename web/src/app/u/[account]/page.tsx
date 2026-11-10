@@ -12,7 +12,7 @@ function ProfilePageInner() {
   const { account } = useParams<{ account: string }>();
   const accountId = decodeURIComponent(account);
   const [rep, setRep] = useState<Reputation | null>(null);
-  const [committees, setCommittees] = useState<Committee[] | null>(null);
+  const [circles, setCommittees] = useState<Committee[] | null>(null);
 
   useEffect(() => {
     getReputation(accountId).then(setRep).catch(() => {});
@@ -24,7 +24,7 @@ function ProfilePageInner() {
     !r || (r.finished === 0 && r.defaults === 0)
       ? "New member"
       : r.defaults > 0
-        ? "Has missed a committee"
+        ? "Has missed a circle"
         : r.finished >= 3
           ? "Trusted"
           : "Building trust";
@@ -41,16 +41,16 @@ function ProfilePageInner() {
         {rep && (
           <>
             <p className="mt-2 text-text">
-              When {displayName(accountId)} gets the pot early, Committee holds back{" "}
+              When {displayName(accountId)} gets the pot early, Rota holds back{" "}
               <strong className="num">{percent(rep.holdback_bps)}</strong> of it until their remaining payments are in.
-              {rep.holdback_bps > 0 ? " Finishing committees without missing a payment lowers this." : ""}
+              {rep.holdback_bps > 0 ? " Finishing circles without missing a payment lowers this." : ""}
             </p>
             <dl className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                ["Committees finished", r!.finished],
+                ["Circles finished", r!.finished],
                 ["Payments on time", r!.on_time],
                 ["Payments missed", r!.missed],
-                ["Committees with a miss", r!.defaults],
+                ["Circles with a miss", r!.defaults],
               ].map(([label, value]) => (
                 <div key={label as string}>
                   <dt className="text-sm text-muted">{label}</dt>
@@ -61,8 +61,8 @@ function ProfilePageInner() {
           </>
         )}
         <p className="mt-5 text-sm text-muted">
-          Holdback: 50% for new members or anyone with a missed committee, 25% after one clean committee, none after
-          three. The record lives in the Committee contract, so any app can read it.
+          Holdback: 50% for new members or anyone with a missed circle, 25% after one clean circle, none after
+          three. The record lives in the Rota contract, so any app can read it.
         </p>
       </section>
 
@@ -70,10 +70,10 @@ function ProfilePageInner() {
         <h2 id="theirs" className="font-display text-2xl font-semibold text-ink mb-3">
           Committees
         </h2>
-        {committees === null && <p className="text-muted">Reading from NEAR…</p>}
-        {committees?.length === 0 && <p className="text-muted">Not in any committees yet.</p>}
+        {circles === null && <p className="text-muted">Reading from NEAR…</p>}
+        {circles?.length === 0 && <p className="text-muted">Not in any circles yet.</p>}
         <ul className="divide-y divide-rule border-y border-rule">
-          {committees?.map((c) => (
+          {circles?.map((c) => (
             <li key={c.id}>
               <Link href={`/c/${c.id}`} className="flex justify-between gap-4 py-3 hover:underline">
                 <span className="font-semibold text-ink">{c.name}</span>

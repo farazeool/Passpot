@@ -33,7 +33,7 @@ export default function CommitteesPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Committees</h1>
+        <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Circles</h1>
         <div className="flex gap-2">
           {accountId && (
             <button className={`btn ${mine ? "btn-primary" : "btn-quiet"}`} onClick={() => setMine(!mine)} aria-pressed={mine}>
@@ -41,16 +41,16 @@ export default function CommitteesPage() {
             </button>
           )}
           <Link href="/new" className="btn btn-pot">
-            Start a committee
+            Start a circle
           </Link>
         </div>
       </div>
 
-      {error && <p className="mt-8 text-missed">Couldn&apos;t read committees from NEAR. Refresh to try again.</p>}
-      {!all && !error && <p className="mt-8 text-muted">Reading committees from NEAR…</p>}
+      {error && <p className="mt-8 text-missed">Couldn&apos;t read circles from NEAR. Refresh to try again.</p>}
+      {!all && !error && <p className="mt-8 text-muted">Reading circles from NEAR…</p>}
       {all && shown.length === 0 && (
         <p className="mt-8 text-muted">
-          {mine ? "You're not in any committees yet." : "No committees yet."}{" "}
+          {mine ? "You're not in any circles yet." : "No circles yet."}{" "}
           <Link href="/demo" className="link">
             Try the demo
           </Link>{" "}

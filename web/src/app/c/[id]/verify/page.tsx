@@ -20,10 +20,10 @@ function VerifyPageInner() {
     setRunning(true);
     setError(null);
     try {
-      const committee = await getCommittee(Number(id));
-      if (!committee) throw new Error(`Committee #${id} doesn't exist.`);
-      setC(committee);
-      setChecks(await runChecks(committee));
+      const circle = await getCommittee(Number(id));
+      if (!circle) throw new Error(`Circle #${id} doesn't exist.`);
+      setC(circle);
+      setChecks(await runChecks(circle));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -41,15 +41,15 @@ function VerifyPageInner() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14">
       <Link href={`/c/${id}`} className="link text-sm">
-        Back to {c?.name ?? `committee #${id}`}
+        Back to {c?.name ?? `circle #${id}`}
       </Link>
       <h1 className="font-display text-4xl font-semibold text-ink mt-3">Check it yourself</h1>
       <p className="mt-3 text-text max-w-prose">
-        These checks run in your browser and read straight from NEAR — the Committee contract (
+        These checks run in your browser and read straight from NEAR — the Rota contract (
         <a className="link" href={explorerAccount(CONTRACT)} target="_blank" rel="noreferrer">
           {CONTRACT}
         </a>
-        ){c?.dao ? ", the committee's Sputnik DAO and the token" : " and the token"}. Nothing here relies on this
+        ){c?.dao ? ", the circle's Sputnik DAO and the token" : " and the token"}. Nothing here relies on this
         website being honest.
       </p>
 

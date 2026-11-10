@@ -1,4 +1,4 @@
-// Shapes returned by the Committee contract's view methods.
+// Shapes returned by the Rota contract's view methods.
 
 export type PayoutMode = "Draw" | "Order" | "Bid";
 export type Status = "Open" | "Running" | "Finished";

@@ -37,7 +37,7 @@ export default function DemoPage() {
     const [org, ...others] = info.members;
     const names = info.members.map(displayName);
     const plan: string[] = [
-      `${names[0]} creates the committee${withDao ? " and its own Sputnik DAO vault" : ""}`,
+      `${names[0]} creates the circle${withDao ? " and its own Sputnik DAO vault" : ""}`,
       "Everyone gets test dollars if they're low",
       ...names.map((n) => `${n} joins and locks a 10 ${TOKEN_SYMBOL} deposit`),
       `${names[0]} starts round 1`,
@@ -59,7 +59,7 @@ export default function DemoPage() {
         mode: "Draw",
         withDao,
       });
-      if (!id) throw new Error("The committee was created but its id couldn't be read. Check the committees list.");
+      if (!id) throw new Error("The circle was created but its id couldn't be read. Check the circles list.");
       rememberDemoCommittee(id);
       let c = await getCommittee(id);
       if (c?.dao && !c.dao_ready) {
@@ -69,7 +69,7 @@ export default function DemoPage() {
           c = await getCommittee(id);
         }
       }
-      if (!c) throw new Error("Couldn't read the new committee.");
+      if (!c) throw new Error("Couldn't read the new circle.");
       mark(step++, "done");
 
       mark(step, "running");
@@ -97,10 +97,10 @@ export default function DemoPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12 sm:py-16">
-      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Try a committee in two minutes</h1>
+      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Try a circle in two minutes</h1>
       <p className="mt-4 text-lg text-text">
         Three ready-made members — {info ? info.members.map(displayName).join(", ") : "Ayesha, Bilal and Sara"} — will
-        set up a real committee on NEAR testnet. Then you play every one of them: pay in, skip a payment, run the draw.
+        set up a real circle on NEAR testnet. Then you play every one of them: pay in, skip a payment, run the draw.
         No wallet needed.
       </p>
 
@@ -108,7 +108,7 @@ export default function DemoPage() {
         <p role="alert" className="mt-8 text-missed bg-missed-wash rounded-lg px-4 py-3">
           The demo isn&apos;t switched on for this site. Connect a testnet wallet and{" "}
           <Link href="/new" className="link">
-            start your own committee
+            start your own circle
           </Link>{" "}
           instead.
         </p>
@@ -128,13 +128,13 @@ export default function DemoPage() {
               <span className="font-semibold text-ink">Give it its own Sputnik DAO vault</span>
               <span className="block text-sm text-muted">
                 {info.daoAvailable
-                  ? "The real thing: every payment goes into a DAO only the committee's rules can spend from. Takes a few extra seconds."
-                  : "The demo's test NEAR for new DAOs is used up for now, so this one keeps its money in the Committee contract."}
+                  ? "The real thing: every payment goes into a DAO only the circle's rules can spend from. Takes a few extra seconds."
+                  : "The demo's test NEAR for new DAOs is used up for now, so this one keeps its money in the Rota contract."}
               </span>
             </span>
           </label>
           <button className="btn btn-pot text-base" onClick={begin} disabled={running}>
-            Set up the demo committee
+            Set up the demo circle
           </button>
         </div>
       )}

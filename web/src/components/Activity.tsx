@@ -8,7 +8,7 @@ function sentence(e: CommitteeEvent, c: Committee): React.ReactNode {
   const amt = `${money(e.amount)} ${TOKEN_SYMBOL}`;
   switch (e.kind) {
     case "Created":
-      return "Committee created";
+      return "Circle created";
     case "DaoReady":
       return (
         <>
@@ -60,7 +60,7 @@ function sentence(e: CommitteeEvent, c: Committee): React.ReactNode {
   }
 }
 
-export function Activity({ committee: c }: { committee: Committee }) {
+export function Activity({ circle: c }: { circle: Committee }) {
   const events = [...c.events].reverse();
   return (
     <ol className="space-y-0">

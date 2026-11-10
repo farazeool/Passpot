@@ -48,16 +48,16 @@ export function Header() {
   }
 
   const nav = [
-    { href: "/committees", label: "Committees" },
-    { href: "/new", label: "Start a committee" },
+    { href: "/circles", label: "Circles" },
+    { href: "/new", label: "Start a circle" },
   ];
 
   return (
     <header className="border-b border-rule bg-paper/90 backdrop-blur sticky top-0 z-30">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Committee home">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Rota home">
           <Mark size={28} />
-          <span className="font-display text-xl font-semibold text-ink">Committee</span>
+          <span className="font-display text-xl font-semibold text-ink">Rota</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1 ml-4">
           {nav.map((n) => (

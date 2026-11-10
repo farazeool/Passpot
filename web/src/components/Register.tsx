@@ -12,8 +12,8 @@ const CELL: Record<Cell, { label: string; className: string; text: string }> = {
   none: { label: "", className: "", text: "" },
 };
 
-/** The committee register: one row per member, one column per round. */
-export function Register({ committee: c }: { committee: Committee }) {
+/** The circle register: one row per member, one column per round. */
+export function Register({ circle: c }: { circle: Committee }) {
   const rows = register(c);
   const rounds = Array.from({ length: c.size }, (_, i) => i + 1);
   if (rows.length === 0) {
@@ -77,7 +77,7 @@ export function Register({ committee: c }: { committee: Committee }) {
       </table>
       <p className="mt-3 px-4 sm:px-0 text-xs text-muted">
         Amounts in {TOKEN_SYMBOL}. A marigold ring marks the round a member received the pot. Still locked is the
-        member&apos;s deposit plus holdback, returned when the committee ends.
+        member&apos;s deposit plus holdback, returned when the circle ends.
       </p>
     </div>
   );

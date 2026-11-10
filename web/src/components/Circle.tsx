@@ -10,16 +10,16 @@ const C = SIZE / 2;
 const R = 150;
 
 interface Props {
-  committee: Committee;
+  circle: Committee;
   /** When set, plays the draw: flicker across the waiting members, then pass the pot. */
   celebrate?: { accountId: string; key: string } | null;
 }
 
 /**
- * The committee as a circle: members around the ring, the pot in the middle.
+ * The circle as a circle: members around the ring, the pot in the middle.
  * Marigold = has received the pot. Green ring = paid this round.
  */
-export function Circle({ committee: c, celebrate }: Props) {
+export function Circle({ circle: c, celebrate }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const [phase, setPhase] = useState<"idle" | "drawing" | "passing">("idle");
   const [flicker, setFlicker] = useState(-1);

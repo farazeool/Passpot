@@ -1,36 +1,36 @@
-# Committee
+# Rota
 
-**A trusted committee without needing to trust the organizer.**
+**The savings circle nobody can run off with.**
 
-Committees (ROSCAs, chit funds, *BC*) are how millions of families in Pakistan, India and the Gulf save and borrow without banks. Everyone pays the same amount each month and one member takes the whole pot, until everyone has had a turn.
+A rotating savings circle (economists call it a ROSCA) is one of the oldest ways people save and borrow without banks. Friends or family each pay the same amount every month, and one of them takes the whole pot, until everyone has had a turn. It's a *committee* in Pakistan and India, a *susu* in Ghana and the Caribbean, a *tanda* in Mexico, a *chama* in Kenya, a *hui* in China and a *tontine* in West Africa.
 
-They break in three ways:
-- **Someone takes the pot early and stops paying.** That's why committees only work among close family.
+Circles break in three ways:
+- **Someone takes the pot early and stops paying.** That's why circles usually only work among close family.
 - **The organizer holds all the cash** and can disappear with it.
 - **Nobody can prove who paid**, so disputes happen over notebooks and WhatsApp.
 
-Committee runs the whole circle on NEAR:
+Rota runs the whole circle on NEAR:
 
-| Problem | What Committee does |
+| Problem | What Rota does |
 | --- | --- |
-| The organizer holds the cash | Each committee gets its **own Sputnik DAO**. Its only council member is the Committee contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
+| The organizer holds the cash | Each circle gets its **own Sputnik DAO**. Its only council member is the Rota contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
 | Someone takes the pot and stops paying | Early winners have part of the pot **held back** and released as they keep paying. A missed payment is covered from holdback, then from their deposit, so the next winner still gets the full pot. |
 | Who gets the pot is rigged | An **on-chain lucky draw** using NEAR's random seed (or an agreed order, or discount bidding). The seed is recorded, so anyone can replay the draw. |
 | Nobody can prove who paid | Every payment, payout and draw is an on-chain event. A **Verify page** re-checks everything in your browser, straight from the chain. |
-| Trust doesn't travel | Finished committees build a **reputation** that lowers your holdback next time: 50% for new members, 25% after one clean committee, none after three. |
+| Trust doesn't travel | Finished circles build a **reputation** that lowers your holdback next time: 50% for new members, 25% after one clean circle, none after three. |
 
 > Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
 
 ## Try it
 
-- **Live app:** _(Vercel URL)_. Use **Try a demo committee** to play three members without a wallet, or connect a NEAR testnet wallet.
-- **Contracts on testnet:** Committee `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
-- **A real committee DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
+- **Live app:** _(Vercel URL)_. Use **Try a demo circle** to play three members without a wallet, or connect a NEAR testnet wallet.
+- **Contracts on testnet:** Rota `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
+- **A real circle's DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
 
 ## How the money moves
 
 ```
-member ──ft_transfer_call──▶ Committee contract ──ft_transfer──▶ committee's Sputnik DAO
+member ──ft_transfer_call──▶ Rota contract ──ft_transfer──▶ the circle's Sputnik DAO
                                    │                                     │
                     rules: draw, holdback,              add_proposal(Transfer) + act_proposal(VoteApprove)
                     default cover, reputation                            │
@@ -49,9 +49,9 @@ Anything that fails partway (a transfer, a forward, the DAO's reply) is recorded
 
 | Path | What it is |
 | --- | --- |
-| `contracts/committee` | The Committee contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
-| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Committee for free. |
-| `web` | The app (Next.js). Committee page with the circle and the register, the Verify page, the no-wallet demo, create and profile pages. |
+| `contracts/committee` | The Rota contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
+| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Rota for free. |
+| `web` | The app (Next.js). Circle page with the circle and the register, the Verify page, the no-wallet demo, create and profile pages. |
 | `scripts` | Testnet scripts (PowerShell): deploy, smoke test, DAO test, demo setup. |
 
 ## Run the tests
@@ -67,7 +67,7 @@ cargo test
 Needs Rust with `wasm32-unknown-unknown`, [`cargo-near`](https://github.com/near/cargo-near), [`near-cli-rs`](https://github.com/near/near-cli-rs), and a testnet account with about 20 NEAR.
 
 ```
-.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Committee
+.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Rota
 .\scripts\dao-test.ps1 -Account your-name.testnet    # one round through a real Sputnik DAO
 .\scripts\setup-demo.ps1 -Account your-name.testnet  # demo members for the website
 ```
@@ -86,8 +86,8 @@ npm run dev
 - **Testnet only.** testUSD has no value. Mainnet would use a real stablecoin and need an audit.
 - **Holdback and deposits reduce default risk; they don't remove it.** Someone who misses more than their holdback and deposit leaves a shortfall in that round's pot. It's recorded on-chain and hits their reputation.
 - **The lucky draw uses NEAR's block random seed.** That's fair for a savings circle, but a block producer could in theory influence it. It's not casino-grade randomness.
-- **A DAO costs 6 NEAR** of storage (the Sputnik factory's price). Without the deposit, a committee is held by the contract itself, which is useful for quick tests.
-- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Committee and testUSD.
+- **A DAO costs 6 NEAR** of storage (the Sputnik factory's price). Without the deposit, a circle's money is held by the contract itself, which is useful for quick tests.
+- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Rota and testUSD.
 
 ## Roadmap
 

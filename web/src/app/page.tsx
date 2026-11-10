@@ -9,7 +9,7 @@ import type { Committee, Member } from "@/lib/types";
 
 const NAMES = ["ayesha", "bilal", "sara", "omar", "hina"];
 
-/** A sample committee for the hero: the pot passes around the circle. */
+/** A sample circle for the hero: the pot passes around the circle. */
 function sample(round: number): Committee {
   const members: Member[] = NAMES.map((n, i) => ({
     account_id: `${n}.testnet`,
@@ -61,7 +61,7 @@ export default function Home() {
     return () => clearInterval(t);
   }, []);
 
-  const committee = useMemo(() => sample(round), [round]);
+  const circle = useMemo(() => sample(round), [round]);
   const celebrate = round > 1 ? { accountId: `${NAMES[round - 2]}.testnet`, key: `r${round}` } : null;
 
   return (
@@ -69,16 +69,20 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-12 sm:pt-20 pb-16 grid gap-12 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-ink leading-[1.02]">
-            A committee where nobody holds the cash.
+            The savings circle nobody can run off with.
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-text max-w-xl">
-            Everyone pays in each month and one member takes the whole pot, until everyone has had a turn. Committee runs
-            that on NEAR: the money sits in a vault no single person controls, and if someone stops paying, the circle
-            keeps going.
+            Friends and family each pay in every month, and one of them takes the whole pot, until everyone has had a
+            turn. It&apos;s called a committee in Pakistan, a susu in Ghana, a tanda in Mexico, a chama in Kenya and a hui
+            in China.
+          </p>
+          <p className="mt-4 text-lg sm:text-xl text-text max-w-xl">
+            Rota runs it on NEAR: the money sits in a vault no single person controls, and if someone stops paying, the
+            circle keeps going.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/demo" className="btn btn-pot text-base">
-              Try a demo committee
+              Try a demo circle
             </Link>
             <Link href="/new" className="btn btn-quiet text-base">
               Start your own
@@ -86,11 +90,11 @@ export default function Home() {
           </div>
           <p className="mt-4 text-sm text-muted">
             The demo needs no wallet. Every step is a real transaction on NEAR testnet.
-            {count ? ` ${count} committees created so far.` : ""}
+            {count ? ` ${count} circles created so far.` : ""}
           </p>
         </div>
         <div aria-hidden="false">
-          <Circle committee={committee} celebrate={celebrate} />
+          <Circle circle={circle} celebrate={celebrate} />
         </div>
       </section>
 
@@ -101,7 +105,7 @@ export default function Home() {
             {[
               [
                 "Everyone pays in",
-                `Each member pays the same amount — say 50 ${TOKEN_SYMBOL} — straight into the committee's vault. The register shows who has paid.`,
+                `Each member pays the same amount — say 50 ${TOKEN_SYMBOL} — straight into the circle's vault. The register shows who has paid.`,
               ],
               [
                 "Anyone closes the round",
@@ -132,13 +136,13 @@ export default function Home() {
             What happens when someone stops paying
           </h2>
           <p className="mt-4 text-lg text-text">
-            This is why committees usually only work between close family. Committee makes the early winner leave part
+            This is why circles usually only work between close family. Rota makes the early winner leave part
             of the pot behind as cover.
           </p>
         </div>
         <div className="rounded-2xl border border-rule bg-sheet p-6 space-y-4 text-text">
           <p>
-            Bilal wins round 1 of a 3-person committee: a{" "}
+            Bilal wins round 1 of a 3-person circle: a{" "}
             <span className="num font-semibold">300 {TOKEN_SYMBOL}</span> pot. He&apos;s new, so{" "}
             <span className="num font-semibold">150</span> is held back and{" "}
             <span className="num font-semibold">150</span> reaches him straight away.
@@ -148,8 +152,8 @@ export default function Home() {
             his holdback covers it. Sara still gets the full <span className="num font-semibold">300</span>.
           </p>
           <p>
-            Bilal&apos;s record now shows a missed payment, so his next committee holds back half again. Members who
-            finish cleanly get less held back — none after three committees.
+            Bilal&apos;s record now shows a missed payment, so his next circle holds back half again. Members who
+            finish cleanly get less held back — none after three circles.
           </p>
         </div>
       </section>
@@ -159,18 +163,18 @@ export default function Home() {
           <div>
             <h2 className="font-display text-3xl sm:text-4xl font-semibold">Nobody holds the cash. Not even the organizer.</h2>
             <p className="mt-4 text-lg text-white/85 max-w-2xl">
-              Each committee gets its own Sputnik DAO. Payments go straight in, and money only leaves through the
-              DAO&apos;s own Transfer proposals — filed and approved by the committee&apos;s rules, because the rules are
+              Each circle gets its own Sputnik DAO. Payments go straight in, and money only leaves through the
+              DAO&apos;s own Transfer proposals — filed and approved by the circle&apos;s rules, because the rules are
               the DAO&apos;s only council member.
             </p>
           </div>
           <div className="space-y-3">
             <p className="text-white/85">
-              Every committee has a Verify page that re-checks the vault, every payout and every draw in your browser,
+              Every circle has a Verify page that re-checks the vault, every payout and every draw in your browser,
               straight from the chain.
             </p>
-            <Link href="/committees" className="btn bg-white text-ink hover:bg-paper">
-              See committees and verify one
+            <Link href="/circles" className="btn bg-white text-ink hover:bg-paper">
+              See circles and verify one
             </Link>
           </div>
         </div>

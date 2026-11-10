@@ -8,7 +8,7 @@ import { countdown, displayName, money } from "@/lib/format";
 import type { Committee } from "@/lib/types";
 
 interface Props {
-  committee: Committee;
+  circle: Committee;
   actor: Actor | null;
   onDone: () => void;
   onSignIn: () => void;
@@ -16,7 +16,7 @@ interface Props {
 }
 
 /** What the current person can do right now, and nothing else. */
-export function Actions({ committee: c, actor, onDone, onSignIn, now }: Props) {
+export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [bidPct, setBidPct] = useState("5");
@@ -50,7 +50,7 @@ export function Actions({ committee: c, actor, onDone, onSignIn, now }: Props) {
   if (c.dao && !c.dao_ready) {
     items.push(
       <div key="dao" className="space-y-2">
-        <p>The committee&apos;s DAO vault is being set up. No money can come in until it&apos;s confirmed.</p>
+        <p>The circle&apos;s DAO vault is being set up. No money can come in until it&apos;s confirmed.</p>
         {actor ? btn("Check the DAO", "Checking…", () => act.recheckDao(actor, c), "btn-quiet") : null}
       </div>,
     );
@@ -68,7 +68,7 @@ export function Actions({ committee: c, actor, onDone, onSignIn, now }: Props) {
       items.push(
         <div key="join" className="space-y-2">
           <p>
-            Join by locking a deposit of <strong className="num">{amount}</strong>. You get it back when the committee
+            Join by locking a deposit of <strong className="num">{amount}</strong>. You get it back when the circle
             ends; it only covers you if you ever miss a payment.
           </p>
           {btn(`Join and lock ${amount}`, "Joining…", () => act.join(actor, c))}
@@ -87,7 +87,7 @@ export function Actions({ committee: c, actor, onDone, onSignIn, now }: Props) {
         items.push(
           <div key="start" className="space-y-2">
             <p>Every seat is taken. Start round 1 when everyone is ready.</p>
-            {btn("Start the committee", "Starting…", () => act.start(actor, c), "btn-pot")}
+            {btn("Start the circle", "Starting…", () => act.start(actor, c), "btn-pot")}
           </div>,
         );
       } else {
@@ -163,16 +163,16 @@ export function Actions({ committee: c, actor, onDone, onSignIn, now }: Props) {
       items.push(
         <div key="claim" className="space-y-2">
           <p>
-            The committee is done. Take back <strong className="num">{money(total)} {TOKEN_SYMBOL}</strong>: your
+            The circle is done. Take back <strong className="num">{money(total)} {TOKEN_SYMBOL}</strong>: your
             deposit, any holdback, and shared discounts.
           </p>
           {btn(`Claim ${money(total)} ${TOKEN_SYMBOL}`, "Claiming…", () => act.claim(actor, c), "btn-pot")}
         </div>,
       );
     } else if (me) {
-      items.push(<p key="claimed">You&apos;ve claimed everything. This committee is complete.</p>);
+      items.push(<p key="claimed">You&apos;ve claimed everything. This circle is complete.</p>);
     } else {
-      items.push(<p key="done">This committee is complete.</p>);
+      items.push(<p key="done">This circle is complete.</p>);
     }
   }
 

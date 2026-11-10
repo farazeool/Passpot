@@ -54,7 +54,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
       const m = setupModal(s, {
         contractId: CONTRACT,
-        description: "Committee uses your NEAR testnet account to join and pay into savings circles.",
+        description: "Rota uses your NEAR testnet account to join and pay into savings circles.",
       });
       const sync = () => {
         const active = s.store.getState().accounts.find((a) => a.active);
