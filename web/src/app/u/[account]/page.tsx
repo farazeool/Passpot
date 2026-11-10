@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { displayName, percent } from "@/lib/format";
+import { displayName, percent, circleName } from "@/lib/format";
 import { getCommitteesFor, getReputation } from "@/lib/near";
 import type { Committee, Reputation } from "@/lib/types";
 
@@ -76,7 +76,7 @@ function ProfilePageInner() {
           {circles?.map((c) => (
             <li key={c.id}>
               <Link href={`/c/${c.id}`} className="flex justify-between gap-4 py-3 hover:underline">
-                <span className="font-semibold text-ink">{c.name}</span>
+                <span className="font-semibold text-ink">{circleName(c.name)}</span>
                 <span className="text-sm text-muted">
                   {c.status === "Running" ? `Round ${c.round} of ${c.size}` : c.status === "Open" ? "Taking members" : "Finished"}
                 </span>

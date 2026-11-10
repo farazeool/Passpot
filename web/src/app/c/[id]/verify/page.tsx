@@ -1,5 +1,7 @@
 "use client";
 
+import { circleName } from "@/lib/format";
+
 import { Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -41,7 +43,7 @@ function VerifyPageInner() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14">
       <Link href={`/c/${id}`} className="link text-sm">
-        Back to {c?.name ?? `circle #${id}`}
+        Back to {(c && circleName(c.name)) ?? `circle #${id}`}
       </Link>
       <h1 className="font-display text-4xl font-semibold text-ink mt-3">Check it yourself</h1>
       <p className="mt-3 text-text max-w-prose">

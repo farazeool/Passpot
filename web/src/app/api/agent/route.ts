@@ -6,7 +6,7 @@
 //  2. Keeps one live demo circle ready on round 2, with real history, so a
 //     visitor lands in a circle that's already going.
 // Each run does a bounded amount of work and picks up where the last one left off.
-import { CONTRACT, DAO_DEPOSIT_NEAR, LIVE_DEMO_PREFIX, TOKEN } from "@/lib/config";
+import { CONTRACT, DAO_DEPOSIT_NEAR, LIVE_DEMO_PREFIX, LIVE_DEMO_ROUND_SECS, TOKEN } from "@/lib/config";
 import { getCommittee, getCommittees, getTokenBalance } from "@/lib/near";
 import { demoAccounts, nearBalance, signAndSend, type DemoAccount } from "@/lib/server/signer";
 import type { Committee } from "@/lib/types";
@@ -17,7 +17,6 @@ const NEAR = 10n ** 24n;
 const BUDGET_MS = 45_000;
 const STEP_MS = 12_000; // a transaction rarely takes longer
 const DEMO_AMOUNT = 10_000_000n; // 10 tUSD
-const DEMO_ROUND_SECS = 86_400; // a day, so the demo circle waits for visitors
 
 function authorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
@@ -78,7 +77,7 @@ async function run(): Promise<{ ok: boolean; did: string[]; error?: string }> {
 
     // 2. Keep a live demo circle on round 2.
     let live: Committee | undefined = circles
-      .filter((c) => c.organizer === organizer.id && c.name.startsWith(LIVE_DEMO_PREFIX) && c.status !== "Finished")
+      .filter((c) => c.organizer === organizer.id && c.round_secs === LIVE_DEMO_ROUND_SECS && c.status !== "Finished")
       .sort((a, b) => b.id - a.id)[0];
 
     if (!live && timeLeft() > STEP_MS) {
@@ -91,7 +90,7 @@ async function run(): Promise<{ ok: boolean; did: string[]; error?: string }> {
           name: `${LIVE_DEMO_PREFIX} Ayesha's family circle`,
           amount: DEMO_AMOUNT.toString(),
           size: members.length,
-          round_secs: DEMO_ROUND_SECS,
+          round_secs: LIVE_DEMO_ROUND_SECS,
           mode: "Draw",
         },
         300,

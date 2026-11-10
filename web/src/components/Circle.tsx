@@ -207,7 +207,7 @@ export function Circle({ circle: c, celebrate, sound = false }: Props) {
 
   return (
     <figure className="w-full max-w-[560px] mx-auto" aria-label={`${c.name}: ${centerTitle}, pot ${money(c.pot)} ${TOKEN_SYMBOL}`}>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible" role="img">
+      <svg viewBox={`-60 0 ${W + 120} ${H}`} className="w-full h-auto overflow-visible" role="img">
         <title>{`${c.name}: ${centerTitle}`}</title>
         <Mat />
 
@@ -303,12 +303,15 @@ function SeatLabel({ s }: { s: { x: number; y: number; member: Committee["member
   const label = m ? displayName(m.account_id) : "Open seat";
   const front = s.y >= CY;
   const side = Math.abs(s.x - CX) > SEAT_RX * 0.8;
-  const y = side ? s.y + 34 : front ? s.y + 34 : s.y - 84;
+  const right = s.x > CX;
+  // Side seats: name outside the mat, level with the person. Front: below. Back: above.
+  const x = side ? s.x + (right ? 44 : -44) : s.x;
+  const y = side ? s.y - 18 : front ? s.y + 34 : s.y - 84;
   return (
     <text
-      x={s.x}
+      x={x}
       y={y}
-      textAnchor="middle"
+      textAnchor={side ? (right ? "start" : "end") : "middle"}
       fontSize="13.5"
       fontWeight={m ? 600 : 400}
       fill={m ? "var(--text)" : "var(--muted)"}

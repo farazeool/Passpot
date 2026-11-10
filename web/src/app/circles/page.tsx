@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { displayName, duration, money } from "@/lib/format";
+import { displayName, duration, money, circleName } from "@/lib/format";
 import { getCommittees } from "@/lib/near";
 import type { Committee } from "@/lib/types";
 import { useWallet } from "@/lib/wallet";
@@ -70,7 +70,7 @@ export default function CommitteesPage() {
               className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_10rem_9rem_8rem] gap-x-6 gap-y-1 py-4 hover:bg-sheet -mx-3 px-3 rounded-lg"
             >
               <span className="min-w-0">
-                <span className="font-display text-lg font-semibold text-ink block truncate">{c.name}</span>
+                <span className="font-display text-lg font-semibold text-ink block truncate">{circleName(c.name)}</span>
                 <span className="text-sm text-muted">
                   #{c.id}, by {displayName(c.organizer)}
                   {c.dao ? ", with its own DAO vault" : ""}

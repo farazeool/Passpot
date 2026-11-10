@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { countdown, displayName, duration, money } from "@/lib/format";
+import { countdown, displayName, duration, money, circleName } from "@/lib/format";
 import type { Committee } from "@/lib/types";
 
 const whatsapp = (text: string) => `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -18,7 +18,7 @@ export function Invite({ circle: c }: { circle: Committee }) {
   const url = useUrl();
   const [copied, setCopied] = useState(false);
   const open = c.size - c.members.length;
-  const text = `Join our savings circle "${c.name}" on Rota: ${c.size} of us each pay ${money(c.amount)} ${TOKEN_SYMBOL} every ${duration(c.round_secs)}, and one of us takes the pot each round. The money sits in a vault nobody controls, not even me. Join here: ${url}`;
+  const text = `Join our savings circle "${circleName(c.name)}" on Rota: ${c.size} of us each pay ${money(c.amount)} ${TOKEN_SYMBOL} every ${duration(c.round_secs)}, and one of us takes the pot each round. The money sits in a vault nobody controls, not even me. Join here: ${url}`;
 
   async function copy() {
     try {
@@ -54,7 +54,7 @@ export function Remind({ circle: c, now }: { circle: Committee; now: number }) {
   const names = unpaid.map((m) => displayName(m.account_id));
   const due = c.round_ends_ms - now;
   const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
-  const text = `Reminder for "${c.name}": round ${c.round} payments of ${money(c.amount)} ${TOKEN_SYMBOL} are due ${
+  const text = `Reminder for "${circleName(c.name)}": round ${c.round} payments of ${money(c.amount)} ${TOKEN_SYMBOL} are due ${
     due > 0 ? `in ${countdown(due)}` : "now"
   }. Still to pay: ${list}. If a payment is missed, it's covered from that member's holdback, and it shows on their record. Pay here: ${url}`;
   return (

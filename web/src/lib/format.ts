@@ -64,3 +64,12 @@ export function countdown(ms: number): string {
 export function percent(bps: number): string {
   return `${bps / 100}%`;
 }
+
+/** A circle's name as people should see it: the live demo prefix becomes a badge instead. */
+export function circleName(name: string): string {
+  return name.replace(/^(undefined|Live demo:)\s*/i, "").trim() || name;
+}
+
+export function isLiveDemoName(name: string): boolean {
+  return /^(undefined|Live demo:)\s/i.test(name);
+}

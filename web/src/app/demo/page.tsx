@@ -8,7 +8,7 @@ import { TOKEN_SYMBOL } from "@/lib/config";
 import { demoActor, getDemoInfo, rememberDemoCommittee, type DemoInfo } from "@/lib/demo";
 import { displayName, toBase } from "@/lib/format";
 import { getCommittee, getCommitteesFor, getTokenBalance } from "@/lib/near";
-import { LIVE_DEMO_PREFIX } from "@/lib/config";
+import { LIVE_DEMO_ROUND_SECS } from "@/lib/config";
 
 type StepState = "waiting" | "running" | "done" | "failed";
 interface Step {
@@ -38,7 +38,7 @@ export default function DemoPage() {
         try {
           const mine = await getCommitteesFor(i.organizer);
           const live = mine
-            .filter((c) => c.name.startsWith(LIVE_DEMO_PREFIX) && c.status === "Running" && c.round >= 2)
+            .filter((c) => c.round_secs === LIVE_DEMO_ROUND_SECS && c.status === "Running" && c.round >= 2)
             .sort((a, b) => b.id - a.id)[0];
           if (live) {
             router.replace(`/c/${live.id}`);

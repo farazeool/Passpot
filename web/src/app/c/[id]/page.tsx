@@ -13,7 +13,7 @@ import { Register } from "@/components/Register";
 import type { Actor } from "@/lib/actions";
 import { TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
 import { demoActor, getDemoInfo, type DemoInfo } from "@/lib/demo";
-import { displayName, duration, money } from "@/lib/format";
+import { displayName, duration, money, circleName } from "@/lib/format";
 import { heldBack, howChosen } from "@/lib/ledger";
 import { getCommittee } from "@/lib/near";
 import type { Committee } from "@/lib/types";
@@ -92,7 +92,7 @@ function CommitteePageInner() {
 
   const latestPayout = [...c.events].reverse().find((e) => e.kind === "Payout");
   const shareText = latestPayout
-    ? `${c.name}: ${displayName(latestPayout.account_id!)} received the round ${latestPayout.round} pot (${money(latestPayout.amount)} ${TOKEN_SYMBOL}, ${howChosen(latestPayout.note)}). Check it yourself: ${typeof window !== "undefined" ? window.location.href : ""}`
+    ? `${circleName(c.name)}: ${displayName(latestPayout.account_id!)} received the round ${latestPayout.round} pot (${money(latestPayout.amount)} ${TOKEN_SYMBOL}, ${howChosen(latestPayout.note)}). Check it yourself: ${typeof window !== "undefined" ? window.location.href : ""}`
     : "";
 
   return (
@@ -102,7 +102,14 @@ function CommitteePageInner() {
           <p className="text-sm text-muted">
             Circle #{c.id}, organized by {displayName(c.organizer)}
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">{c.name}</h1>
+          <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink mt-1">
+            {circleName(c.name)}
+            {isDemo && (
+              <span className="ml-3 align-middle inline-block rounded-full bg-marigold-wash border border-marigold/50 px-3 py-1 text-sm font-sans font-semibold text-ink">
+                Live demo
+              </span>
+            )}
+          </h1>
           <p className="mt-2 text-muted">
             {c.size} members pay <span className="num font-semibold text-text">{money(c.amount)} {TOKEN_SYMBOL}</span>{" "}
             every {duration(c.round_secs)}. {MODE_TEXT[c.mode]}.

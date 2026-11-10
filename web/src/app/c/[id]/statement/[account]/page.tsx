@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Mark } from "@/components/Mark";
 import { CONTRACT, TOKEN_SYMBOL, explorerAccount } from "@/lib/config";
-import { displayName, money } from "@/lib/format";
+import { displayName, money, circleName } from "@/lib/format";
 import { howChosen } from "@/lib/ledger";
 import { getCommittee } from "@/lib/near";
 import type { Committee, CommitteeEvent } from "@/lib/types";
@@ -70,7 +70,7 @@ function StatementInner() {
       </header>
 
       <section className="rounded-2xl border border-rule bg-sheet p-5">
-        <h2 className="font-display text-xl font-semibold text-ink">{c.name}</h2>
+        <h2 className="font-display text-xl font-semibold text-ink">{circleName(c.name)}</h2>
         <p className="text-sm text-muted">
           Circle #{c.id}, organized by {displayName(c.organizer)}. {c.size} members, {money(c.amount)} {TOKEN_SYMBOL} per
           round.{" "}
