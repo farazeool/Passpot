@@ -396,9 +396,8 @@ export default function Home() {
       <section id="faq" className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 scroll-mt-24" aria-labelledby="faq-title">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] items-start">
           <div className="lg:sticky lg:top-24">
-            <p className="text-sm font-semibold text-muted">Frequently asked questions</p>
-            <h2 id="faq-title" className="mt-1 font-display text-3xl sm:text-4xl font-semibold text-ink">
-              FAQ
+            <h2 id="faq-title" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
+              FAQ <span className="text-muted font-medium text-xl sm:text-2xl tracking-normal">(Frequently asked questions)</span>
             </h2>
             <p className="mt-4 text-lg text-text">The things people ask before they join their first circle.</p>
           </div>
