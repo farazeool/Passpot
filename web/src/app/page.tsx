@@ -169,6 +169,12 @@ export default function Home() {
     <>
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-12 sm:pt-20 pb-12 grid gap-12 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
+          <p className="rise mb-5 inline-flex items-center gap-2.5 rounded-full border border-rule bg-sheet pl-1.5 pr-3.5 py-1.5 text-sm" style={{ animationDelay: "0ms" }}>
+            <span className="rounded-full bg-marigold px-2.5 py-0.5 font-display text-[13px] font-bold tracking-[0.12em] text-[#241a02]">
+              ROTA
+            </span>
+            <span className="font-medium text-ink">Savings circles on NEAR</span>
+          </p>
           <h1 className="font-display text-[2.7rem] sm:text-6xl lg:text-[4.2rem] font-semibold text-ink leading-[1.03]">
             <span className="rise block sm:whitespace-nowrap" style={{ animationDelay: "80ms" }}>
               Everyone pays in.
