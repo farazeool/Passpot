@@ -2,7 +2,7 @@ export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK ?? "testnet") as "testne
 export const CONTRACT = process.env.NEXT_PUBLIC_CONTRACT ?? "cmt.fatneek-committee.testnet";
 export const TOKEN = process.env.NEXT_PUBLIC_TOKEN ?? "usd.fatneek-committee.testnet";
 export const RPC_URLS = (
-  process.env.NEXT_PUBLIC_RPC ?? "https://rpc.testnet.near.org,https://test.rpc.fastnear.com"
+  process.env.NEXT_PUBLIC_RPC ?? "https://test.rpc.fastnear.com,https://rpc.testnet.near.org"
 ).split(",");
 
 /** testUSD has 6 decimals, like USDC. */

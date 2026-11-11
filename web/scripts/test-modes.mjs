@@ -6,7 +6,7 @@ import { Account, JsonRpcProvider, KeyPairSigner } from "near-api-js";
 
 const CONTRACT = "cmt.fatneek-committee.testnet";
 const TOKEN = "usd.fatneek-committee.testnet";
-const RPC = "https://rpc.testnet.near.org";
+const RPC = "https://test.rpc.fastnear.com";
 const AMOUNT = 10_000_000n; // 10 tUSD (6 decimals)
 const TGAS = 1_000_000_000_000n;
 
