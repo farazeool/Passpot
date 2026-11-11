@@ -8,6 +8,7 @@ import { TOKEN_SYMBOL } from "@/lib/config";
 import { money } from "@/lib/format";
 import { nameOf, useProfile } from "@/lib/profile";
 import { Avatar, Person } from "./Avatar";
+import { useToast } from "./Toast";
 import { getTokenBalance } from "@/lib/near";
 import { useWallet } from "@/lib/wallet";
 import { Mark } from "./Mark";
@@ -18,7 +19,7 @@ export function Header() {
   const pathname = usePathname();
   const [balance, setBalance] = useState<bigint | null>(null);
   const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+  const toast = useToast();
   const profile = useProfile(accountId);
 
   const refresh = useCallback(async () => {
@@ -39,13 +40,12 @@ export function Header() {
   async function getDollars() {
     if (!actor) return;
     setBusy(true);
-    setNote(null);
     try {
       await faucet(actor);
       await refresh();
-      setNote(`Added 1,000 ${TOKEN_SYMBOL}`);
+      toast(`Added 1,000 ${TOKEN_SYMBOL} to your wallet.`);
     } catch (e) {
-      setNote(explainError(e));
+      toast(explainError(e), { tone: "info" });
     } finally {
       setBusy(false);
     }
@@ -136,11 +136,6 @@ export function Header() {
               Make your profile
             </Link>
           </div>
-        </div>
-      )}
-      {note && (
-        <div role="status" className="mx-auto max-w-6xl px-4 sm:px-6 pb-2 text-sm text-ink-soft">
-          {note}
         </div>
       )}
     </header>
