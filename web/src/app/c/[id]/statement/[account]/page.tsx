@@ -65,7 +65,7 @@ function StatementInner() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Mark size={28} />
-          <span className="font-display text-xl font-semibold text-ink">Rota</span>
+          <span className="font-display text-xl font-semibold text-ink">Passpot</span>
         </div>
       </header>
 
@@ -122,7 +122,7 @@ function StatementInner() {
 
       <footer className="text-xs text-muted space-y-1">
         <p>
-          Every line comes straight from the Rota contract on NEAR testnet (
+          Every line comes straight from the Passpot contract on NEAR testnet (
           <a className="link" href={explorerAccount(CONTRACT)}>
             {CONTRACT}
           </a>

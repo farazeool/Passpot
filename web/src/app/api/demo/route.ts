@@ -1,6 +1,6 @@
 // Signs transactions for the ready-made demo members, so anyone can try
-// Rota without a wallet. Testnet only: the demo accounts hold nothing but
-// test dollars and a little test NEAR for fees. Only Rota and testUSD calls
+// Passpot without a wallet. Testnet only: the demo accounts hold nothing but
+// test dollars and a little test NEAR for fees. Only Passpot and testUSD calls
 // are allowed, and only the ones the app itself makes.
 import { CONTRACT, DAO_DEPOSIT_NEAR, TOKEN } from "@/lib/config";
 import { demoAccounts, nearBalance, signAndSend } from "@/lib/server/signer";
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       if (deposit !== 0n) return reject("No deposit allowed.");
     } else if (methodName === "ft_transfer_call") {
       if (deposit !== 1n) return reject("Token transfers attach exactly 1 yoctoNEAR.");
-      if (args.receiver_id !== CONTRACT) return reject("Demo members can only pay into Rota.");
+      if (args.receiver_id !== CONTRACT) return reject("Demo members can only pay into Passpot.");
     } else {
       return reject("Not allowed in the demo.");
     }
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       return reject("No deposit allowed.");
     }
   } else {
-    return reject("Demo members can only use Rota and testUSD.");
+    return reject("Demo members can only use Passpot and testUSD.");
   }
 
   try {

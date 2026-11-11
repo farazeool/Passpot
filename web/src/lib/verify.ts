@@ -52,8 +52,8 @@ export async function runChecks(c: Committee): Promise<Check[]> {
         title: "Only the circle's rules can move the money",
         ok: movers.length > 0 && onlyContract,
         detail: onlyContract
-          ? `The DAO's only member with power to approve payments is the Rota contract (${CONTRACT}). Everyone else can only file non-binding polls.`
-          : "The DAO policy gives payment power to someone other than the Rota contract.",
+          ? `The DAO's only member with power to approve payments is the Passpot contract (${CONTRACT}). Everyone else can only file non-binding polls.`
+          : "The DAO policy gives payment power to someone other than the Passpot contract.",
         items: policy.roles.map((r) => ({
           ok: true,
           text: `Role "${r.name}": ${JSON.stringify(r.kind)} can ${r.permissions.join(", ")}`,
@@ -66,7 +66,7 @@ export async function runChecks(c: Committee): Promise<Check[]> {
     checks.push({
       title: "Only the circle's rules can move the money",
       ok: null,
-      detail: "This is a test circle without its own DAO; the Rota contract holds its money directly.",
+      detail: "This is a test circle without its own DAO; the Passpot contract holds its money directly.",
     });
   }
 

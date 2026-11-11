@@ -114,15 +114,15 @@ const FAQ: [string, string][] = [
   ],
   [
     "Is this real money?",
-    `Not yet. Rota runs on NEAR testnet with ${TOKEN_SYMBOL}, a test dollar with no value that you can get for free. The same contract can run with real stablecoins like USDC on NEAR mainnet.`,
+    `Not yet. Passpot runs on NEAR testnet with ${TOKEN_SYMBOL}, a test dollar with no value that you can get for free. The same contract can run with real stablecoins like USDC on NEAR mainnet.`,
   ],
   [
-    "Does Rota take a cut?",
+    "Does Passpot take a cut?",
     "No. There's no fee in the contract. The only costs are NEAR's network fees, which are fractions of a cent, and a one-time storage deposit for the circle's DAO.",
   ],
   [
     "Where is my profile kept?",
-    "On NEAR Social, the profile store NEAR apps share, under your own account. Your savings record is kept by the Rota contract. Neither sits on our servers, and nobody can edit your record.",
+    "On NEAR Social, the profile store NEAR apps share, under your own account. Your savings record is kept by the Passpot contract. Neither sits on our servers, and nobody can edit your record.",
   ],
 ];
 
@@ -197,7 +197,7 @@ export default function Home() {
           </p>
           <p className="rise mt-4 text-lg text-text max-w-xl" style={{ animationDelay: "1600ms" }}>
             Friends and family each pay in every month, and one of them takes the whole pot, until everyone has had a
-            turn. Rota runs it on NEAR: the money sits in a vault nobody controls, and if someone stops paying, the
+            turn. Passpot runs it on NEAR: the money sits in a vault nobody controls, and if someone stops paying, the
             circle keeps going.
           </p>
           <div className="rise mt-8 flex flex-wrap gap-3" style={{ animationDelay: "1800ms" }}>
@@ -224,7 +224,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section aria-label="Rota so far" className="mx-auto max-w-6xl px-4 sm:px-6 pb-14">
+      <section aria-label="Passpot so far" className="mx-auto max-w-6xl px-4 sm:px-6 pb-14">
         <dl className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-3xl overflow-hidden border border-rule bg-rule">
           {[
             ["Circles created", stats ? <CountUp key="c" to={stats.circles} /> : "…"],
@@ -241,7 +241,7 @@ export default function Home() {
             </div>
           ))}
         </dl>
-        <p className="mt-3 text-xs text-muted">Read live from the Rota contract on NEAR testnet.</p>
+        <p className="mt-3 text-xs text-muted">Read live from the Passpot contract on NEAR testnet.</p>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-20">
@@ -263,7 +263,7 @@ export default function Home() {
             </div>
           </Tilt>
           <Tilt max={5} className="rounded-3xl bg-band text-band-fg p-6 sm:p-8">
-            <p className="text-xs font-semibold uppercase tracking-wider text-marigold">With Rota</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-marigold">With Passpot</p>
             <ul className="mt-4 space-y-4">
               {[
                 ["The cash sits in a vault, not a pocket", "Each circle gets its own Sputnik DAO. Nobody, including the organizer, can take money out."],
@@ -321,7 +321,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20" aria-labelledby="trust">
         <div className="max-w-2xl">
           <h2 id="trust" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
-            Pay on time, and Rota trusts you more.
+            Pay on time, and Passpot trusts you more.
           </h2>
           <p className="mt-4 text-lg text-text">
             When you get the pot before you&apos;ve finished paying in, part of it is held back as cover for the

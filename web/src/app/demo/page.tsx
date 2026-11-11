@@ -151,7 +151,7 @@ export default function DemoPage() {
               <span className="block text-sm text-muted">
                 {info.daoAvailable
                   ? "The real thing: every payment goes into a DAO only the circle's rules can spend from. Takes a few extra seconds."
-                  : "The demo's test NEAR for new DAOs is used up for now, so this one keeps its money in the Rota contract."}
+                  : "The demo's test NEAR for new DAOs is used up for now, so this one keeps its money in the Passpot contract."}
               </span>
             </span>
           </label>

@@ -1,4 +1,4 @@
-# Rota
+# Passpot
 
 **The savings circle nobody can run off with.**
 
@@ -9,15 +9,15 @@ Circles break in three ways:
 - **The organizer holds all the cash** and can disappear with it.
 - **Nobody can prove who paid**, so disputes happen over notebooks and WhatsApp.
 
-Rota runs the whole circle on NEAR:
+Passpot runs the whole circle on NEAR:
 
-| Problem | What Rota does |
+| Problem | What Passpot does |
 | --- | --- |
-| The organizer holds the cash | Each circle gets its **own Sputnik DAO**. Its only council member is the Rota contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
+| The organizer holds the cash | Each circle gets its **own Sputnik DAO**. Its only council member is the Passpot contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
 | Someone takes the pot and stops paying | Early winners have part of the pot **held back** and released as they keep paying. A missed payment is covered from holdback, then from their deposit, so the next winner still gets the full pot. |
 | Who gets the pot is rigged | An **on-chain lucky draw** using NEAR's random seed (or an agreed order, or discount bidding). The seed is recorded, so anyone can replay the draw. |
 | Nobody can prove who paid | Every payment, payout and draw is an on-chain event. A **Verify page** re-checks everything in your browser, straight from the chain. |
-| Nobody remembers to close the round | The **Rota agent** runs every five minutes and closes any round whose time is up, covering missed payments and running the draw. Anyone can close a round; the agent makes sure someone always does. |
+| Nobody remembers to close the round | The **Passpot agent** runs every five minutes and closes any round whose time is up, covering missed payments and running the draw. Anyone can close a round; the agent makes sure someone always does. |
 | Trust doesn't travel | Finished circles build a **reputation** that lowers your holdback next time: 50% for new members, 25% after one clean circle, none after three. |
 
 > Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
@@ -25,13 +25,13 @@ Rota runs the whole circle on NEAR:
 ## Try it
 
 - **Live app:** https://rota-sage-pi.vercel.app. **Try a demo circle** drops you straight into a live circle already on round 2, where you can act as Ayesha, Bilal or Sara without a wallet. Or connect a NEAR testnet wallet and start your own.
-- **Contracts on testnet:** Rota `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
+- **Contracts on testnet:** Passpot `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
 - **A real circle's DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
 
 ## How the money moves
 
 ```
-member ──ft_transfer_call──▶ Rota contract ──ft_transfer──▶ the circle's Sputnik DAO
+member ──ft_transfer_call──▶ Passpot contract ──ft_transfer──▶ the circle's Sputnik DAO
                                    │                                     │
                     rules: draw, holdback,              add_proposal(Transfer) + act_proposal(VoteApprove)
                     default cover, reputation                            │
@@ -50,9 +50,9 @@ Anything that fails partway (a transfer, a forward, the DAO's reply) is recorded
 
 | Path | What it is |
 | --- | --- |
-| `contracts/committee` | The Rota contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
-| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Rota for free. |
-| `web/src/app/api/agent` | The Rota agent: closes due rounds in every circle, and keeps one live demo circle ready on round 2. Run by GitHub Actions every five minutes (`.github/workflows/agent.yml`), with Vercel Cron daily as a backup. |
+| `contracts/committee` | The Passpot contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
+| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Passpot for free. |
+| `web/src/app/api/agent` | The Passpot agent: closes due rounds in every circle, and keeps one live demo circle ready on round 2. Run by GitHub Actions every five minutes (`.github/workflows/agent.yml`), with Vercel Cron daily as a backup. |
 | `web` | The app (Next.js). Circle page with the circle and the register, the Verify page, the no-wallet demo, create and profile pages. |
 | `scripts` | Testnet scripts (PowerShell): deploy, smoke test, DAO test, demo setup. |
 
@@ -69,7 +69,7 @@ cargo test
 Needs Rust with `wasm32-unknown-unknown`, [`cargo-near`](https://github.com/near/cargo-near), [`near-cli-rs`](https://github.com/near/near-cli-rs), and a testnet account with about 20 NEAR.
 
 ```
-.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Rota
+.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Passpot
 .\scripts\dao-test.ps1 -Account your-name.testnet    # one round through a real Sputnik DAO
 .\scripts\setup-demo.ps1 -Account your-name.testnet  # demo members for the website
 ```
@@ -93,7 +93,7 @@ Every circle page also has: an **Invite on WhatsApp** link while seats are open,
 - **Holdback and deposits reduce default risk; they don't remove it.** Someone who misses more than their holdback and deposit leaves a shortfall in that round's pot. It's recorded on-chain and hits their reputation.
 - **The lucky draw uses NEAR's block random seed.** That's fair for a savings circle, but a block producer could in theory influence it. It's not casino-grade randomness.
 - **A DAO costs 6 NEAR** of storage (the Sputnik factory's price). Without the deposit, a circle's money is held by the contract itself, which is useful for quick tests.
-- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Rota and testUSD.
+- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Passpot and testUSD.
 
 ## Roadmap
 

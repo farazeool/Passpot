@@ -2,7 +2,7 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Rota: the look of a hand-kept committee register.
+/* Passpot: the look of a hand-kept committee register.
    Light: ink-blue on cool paper. Dark: the same register by lamplight, deep indigo
    with warm marigold. One accent everywhere: marigold, for the pot and whose turn it is. */
 :root {

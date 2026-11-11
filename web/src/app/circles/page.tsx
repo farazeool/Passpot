@@ -323,7 +323,7 @@ export default function CommitteesPage() {
 
       {demoCount > 0 && (
         <p className="mt-8 text-sm text-muted">
-          {showDemos ? "Showing" : "Hiding"} {demoCount} demo circle{demoCount === 1 ? "" : "s"} visitors made while trying Rota.{" "}
+          {showDemos ? "Showing" : "Hiding"} {demoCount} demo circle{demoCount === 1 ? "" : "s"} visitors made while trying Passpot.{" "}
           <button className="link" onClick={() => setShowDemos(!showDemos)}>
             {showDemos ? "Hide them" : "Show them"}
           </button>

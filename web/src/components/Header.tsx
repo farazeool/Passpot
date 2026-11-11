@@ -62,9 +62,9 @@ export function Header() {
   return (
     <header className="border-b border-rule bg-paper/90 backdrop-blur sticky top-0 z-30 print:hidden">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Rota home">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Passpot home">
           <Mark size={34} />
-          <span className="font-display text-[1.65rem] font-bold tracking-[-0.03em] text-ink">Rota</span>
+          <span className="font-display text-[1.65rem] font-bold tracking-[-0.03em] text-ink">Passpot</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1 ml-4">
           {nav.map((n) => (

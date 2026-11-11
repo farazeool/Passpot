@@ -18,7 +18,7 @@ export function Invite({ circle: c }: { circle: Committee }) {
   const url = useUrl();
   const [copied, setCopied] = useState(false);
   const open = c.size - c.members.length;
-  const text = `Join our savings circle "${circleName(c.name)}" on Rota: ${c.size} of us each pay ${money(c.amount)} ${TOKEN_SYMBOL} every ${duration(c.round_secs)}, and one of us takes the pot each round. The money sits in a vault nobody controls, not even me. Join here: ${url}`;
+  const text = `Join our savings circle "${circleName(c.name)}" on Passpot: ${c.size} of us each pay ${money(c.amount)} ${TOKEN_SYMBOL} every ${duration(c.round_secs)}, and one of us takes the pot each round. The money sits in a vault nobody controls, not even me. Join here: ${url}`;
 
   async function copy() {
     try {

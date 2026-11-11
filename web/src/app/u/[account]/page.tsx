@@ -133,13 +133,13 @@ function ProfilePageInner() {
             </div>
           )}
           <p className="mt-4 text-sm text-muted">
-            Kept by the Rota contract, not by us: any app on NEAR can read it, and nobody can edit it.
+            Kept by the Passpot contract, not by us: any app on NEAR can read it, and nobody can edit it.
           </p>
         </section>
 
         <section className="card p-5 sm:p-6" aria-labelledby="totals">
           <p id="totals" className="text-sm font-semibold text-muted">
-            With Rota
+            With Passpot
           </p>
           <dl className="mt-3 space-y-4">
             <div>

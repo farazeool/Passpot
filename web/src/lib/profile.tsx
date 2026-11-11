@@ -1,7 +1,7 @@
 "use client";
 
 // Member profiles, stored on NEAR Social (SocialDB): the same profile a person
-// has across NEAR apps. Rota reads name, about, city and what they're saving for.
+// has across NEAR apps. Passpot reads name, about, city and what they're saving for.
 import { useEffect, useState } from "react";
 import { NEAR, type Actor } from "./actions";
 import { SOCIAL_DB } from "./config";
@@ -15,7 +15,7 @@ export interface Profile {
   name?: string;
   description?: string;
   location?: string;
-  /** Rota-specific: what this person is saving for. */
+  /** Passpot-specific: what this person is saving for. */
   saving_for?: string;
   image?: { url?: string; ipfs_cid?: string };
 }

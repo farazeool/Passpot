@@ -45,7 +45,7 @@ export function icsFor(c: Committee, url: string, includeCurrent: boolean): stri
       "END:VEVENT",
     ].join("\r\n");
   });
-  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Rota//Savings circle//EN", "CALSCALE:GREGORIAN", ...events, "END:VCALENDAR"].join(
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Passpot//Savings circle//EN", "CALSCALE:GREGORIAN", ...events, "END:VCALENDAR"].join(
     "\r\n",
   );
 }
@@ -71,7 +71,7 @@ export function googleLink(c: Committee, url: string, includeCurrent: boolean): 
     action: "TEMPLATE",
     text: `Pay ${amount} into ${circleName(c.name)}`,
     dates: `${stamp(new Date(first.getTime() - 30 * 60 * 1000))}/${stamp(first)}`,
-    details: `Your Rota savings circle payment. Pay here: ${url}`,
+    details: `Your Passpot savings circle payment. Pay here: ${url}`,
   });
   const days = Math.round(c.round_secs / DAY);
   if (dates.length > 1 && days * DAY === c.round_secs) {

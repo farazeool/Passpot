@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Tilt } from "@/components/Tilt";
 
 export const metadata: Metadata = {
-  title: "About Rota",
-  description: "Why Rota exists, why it runs on NEAR, and where it goes next.",
+  title: "About Passpot",
+  description: "Why Passpot exists, why it runs on NEAR, and where it goes next.",
 };
 
 const WHY_NEAR: [string, string][] = [
@@ -18,11 +18,11 @@ const WHY_NEAR: [string, string][] = [
   ],
   [
     "A vault per circle",
-    "Each circle gets its own Sputnik DAO, a well-tested NEAR contract for holding shared money. Rota's rules are its only council member.",
+    "Each circle gets its own Sputnik DAO, a well-tested NEAR contract for holding shared money. Passpot's rules are its only council member.",
   ],
   [
     "Profiles that travel",
-    "Profiles live on NEAR Social and savings records in the Rota contract, so any NEAR app can read them. Your record isn't locked inside Rota.",
+    "Profiles live on NEAR Social and savings records in the Passpot contract, so any NEAR app can read them. Your record isn't locked inside Passpot.",
   ],
 ];
 
@@ -39,7 +39,7 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16">
       <div className="max-w-3xl">
-        <p className="text-sm font-semibold text-muted">About Rota</p>
+        <p className="text-sm font-semibold text-muted">About Passpot</p>
         <h1 className="mt-2 font-display text-4xl sm:text-6xl font-semibold text-ink">
           Saving together shouldn&apos;t depend on trusting one person.
         </h1>
@@ -55,7 +55,7 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <section className="mt-16 grid gap-6 lg:grid-cols-3" aria-label="What Rota changes">
+      <section className="mt-16 grid gap-6 lg:grid-cols-3" aria-label="What Passpot changes">
         {[
           ["The money", "sits in a vault with its own rules, not in anyone's pocket. Not even the organizer can move it."],
           ["The turns", "are decided by an on-chain draw, the agreed order or a bid. Anyone can check every result."],

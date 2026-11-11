@@ -1,4 +1,4 @@
-// The Rota agent. Runs every few minutes (GitHub Actions, with Vercel Cron as
+// The Passpot agent. Runs every few minutes (GitHub Actions, with Vercel Cron as
 // a backup) and does two jobs nobody should have to remember:
 //  1. Closes any round whose time is up, in any circle. Closing covers missed
 //     payments from holdback and runs the draw. Anyone may call advance_round;

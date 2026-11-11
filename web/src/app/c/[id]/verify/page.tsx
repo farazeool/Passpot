@@ -49,7 +49,7 @@ function VerifyPageInner() {
       </Link>
       <h1 className="font-display text-4xl font-semibold text-ink mt-3">Check it yourself</h1>
       <p className="mt-3 text-text max-w-prose">
-        These checks run in your browser and read straight from NEAR — the Rota contract (
+        These checks run in your browser and read straight from NEAR — the Passpot contract (
         <a className="link" href={explorerAccount(CONTRACT)} target="_blank" rel="noreferrer">
           {CONTRACT}
         </a>

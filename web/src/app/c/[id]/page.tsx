@@ -289,12 +289,12 @@ function CommitteePageInner() {
                   {c.dao}
                 </a>{" "}
                 <Copy value={c.dao} label="Copy the DAO address" />
-                . Its only council member is the Rota contract, so no person — not even the organizer — can move
+                . Its only council member is the Passpot contract, so no person — not even the organizer — can move
                 it. It should hold <strong className="num">{money(c.held)} {TOKEN_SYMBOL}</strong> right now.
               </p>
             ) : (
               <p className="text-text">
-                Held by the Rota contract itself (a test circle without its own DAO):{" "}
+                Held by the Passpot contract itself (a test circle without its own DAO):{" "}
                 <strong className="num">{money(c.held)} {TOKEN_SYMBOL}</strong>.
               </p>
             )}
