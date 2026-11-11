@@ -34,10 +34,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
     (async () => {
-      const [{ setupWalletSelector }, { setupModal }, myNear, meteor, here, intear] = await Promise.all([
+      const [{ setupWalletSelector }, { setupModal }, meteor, here, intear] = await Promise.all([
         import("@near-wallet-selector/core"),
         import("@near-wallet-selector/modal-ui"),
-        import("@near-wallet-selector/my-near-wallet"),
         import("@near-wallet-selector/meteor-wallet"),
         import("@near-wallet-selector/here-wallet"),
         import("@near-wallet-selector/intear-wallet"),
@@ -45,7 +44,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const s = await setupWalletSelector({
         network: NETWORK,
         modules: [
-          myNear.setupMyNearWallet(),
           meteor.setupMeteorWallet(),
           intear.setupIntearWallet(),
           here.setupHereWallet(),
@@ -55,7 +53,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const m = setupModal(s, {
         contractId: CONTRACT,
         theme: "auto",
-        description: "Passpot uses your NEAR testnet account to join and pay into savings circles.",
+        description:
+          "Passpot uses your NEAR testnet account to join and pay into savings circles. New wallet? It needs a little free test NEAR first: get it at near-faucet.io.",
       });
       const sync = () => {
         const active = s.store.getState().accounts.find((a) => a.active);
