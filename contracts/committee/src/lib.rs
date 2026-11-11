@@ -90,6 +90,8 @@ pub struct CommitteeView {
     pub held: U128,
     /// Payments received but not yet forwarded to the DAO (normally 0).
     pub unforwarded: U128,
+    /// Clean finished circles a member needs on their record to join (0 = anyone).
+    pub min_clean_circles: u32,
 }
 
 #[near(serializers = [json])]
@@ -156,8 +158,12 @@ impl Contract {
         size: u32,
         round_secs: u64,
         mode: Option<PayoutMode>,
+        min_clean_circles: Option<u32>,
     ) -> u64 {
         let id = self.next_id;
+        let min_clean = min_clean_circles.unwrap_or(0);
+        require!(min_clean <= 10, "Ask for at most 10 clean circles");
+        set_join_rule(id, min_clean);
         self.next_id += 1;
         let organizer = env::predecessor_account_id();
         let mut c = Committee::new(
@@ -303,6 +309,9 @@ impl Contract {
         let id = match &parsed {
             TransferMsg::Join { committee_id } | TransferMsg::Contribute { committee_id } => *committee_id,
         };
+        if let TransferMsg::Join { .. } = parsed {
+            self.check_join_rule(id, &sender_id);
+        }
         let c = self.committee_mut(id);
         require!(c.token == token, "Wrong token for this committee");
         match parsed {
@@ -496,8 +505,31 @@ impl Contract {
             can_advance: c.can_advance(now),
             held: U128(c.held()),
             unforwarded: U128(self.unforwarded.get(&c.id).copied().unwrap_or(0)),
+            min_clean_circles: join_rule(c.id),
             committee: c.clone(),
         }
+    }
+
+    /// Reputation-based access: a circle can ask joiners for a clean savings record.
+    /// The organizer is exempt from their own circle's rule.
+    fn check_join_rule(&self, committee_id: u64, who: &AccountId) {
+        let min = join_rule(committee_id);
+        if min == 0 {
+            return;
+        }
+        let c = self.committees.get(&committee_id).expect("No such committee");
+        if &c.organizer == who {
+            return;
+        }
+        let r = self.reputation.get(who).cloned().unwrap_or_default();
+        require!(
+            r.defaults == 0 && r.finished >= min,
+            format!(
+                "This circle only takes members with at least {} clean circle{} and no missed circles on their savings record",
+                min,
+                if min == 1 { "" } else { "s" }
+            )
+        );
     }
 
     /// Short DAO name, unique per contract: e.g. "app-fatneek-committee-7".
@@ -627,6 +659,25 @@ fn now_ms() -> u64 {
     env::block_timestamp_ms()
 }
 
+// Join rules live under their own storage keys, so adding them needed no state migration:
+// committees created before the upgrade simply have no rule (anyone can join).
+fn join_rule_key(id: u64) -> Vec<u8> {
+    format!("jr:{}", id).into_bytes()
+}
+
+fn join_rule(id: u64) -> u32 {
+    env::storage_read(&join_rule_key(id))
+        .and_then(|b| b.try_into().ok())
+        .map(u32::from_le_bytes)
+        .unwrap_or(0)
+}
+
+fn set_join_rule(id: u64, min: u32) {
+    if min > 0 {
+        env::storage_write(&join_rule_key(id), &min.to_le_bytes());
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -679,7 +730,7 @@ mod tests {
     fn setup() -> (Contract, u64) {
         let mut c = new_contract();
         set("ayesha.testnet", 0);
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         for who in MEMBERS {
             pay(&mut c, who, "join", id, 100, 0);
         }
@@ -691,7 +742,7 @@ mod tests {
     fn setup_dao() -> (Contract, u64) {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         // Sputnik's factory hands back the deployment's empty value.
         callback(0, PromiseResult::Successful(vec![]));
         assert!(c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT));
@@ -750,7 +801,7 @@ mod tests {
     fn creating_with_a_deposit_asks_the_factory_for_a_dao_ruled_only_by_the_contract() {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         let v = c.get_committee(id).unwrap();
         assert_eq!(v.committee.dao, Some(acc("app-fatneek-1.sputnikv2.testnet")));
         assert!(!v.committee.dao_ready);
@@ -767,7 +818,7 @@ mod tests {
     fn no_money_is_accepted_before_the_dao_exists() {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         pay(&mut c, "bilal.testnet", "join", id, 100, 0);
     }
 
@@ -775,7 +826,7 @@ mod tests {
     fn a_dao_can_be_confirmed_later_by_asking_it() {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         set("anyone.testnet", 1);
         let _ = c.recheck_dao(id);
         assert!(receipt_methods().contains(&("app-fatneek-1.sputnikv2.testnet".into(), "get_config".into())));
@@ -789,14 +840,14 @@ mod tests {
     fn too_small_a_dao_deposit_is_refused() {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, NearToken::from_near(1)).build());
-        c.create_committee("Family".into(), U128(100), 3, 60, None);
+        c.create_committee("Family".into(), U128(100), 3, 60, None, None);
     }
 
     #[test]
     fn failed_dao_creation_falls_back_and_refunds_the_organizer() {
         let mut c = new_contract();
         testing_env!(ctx("ayesha.testnet", 0, DAO_DEPOSIT).build());
-        let id = c.create_committee("Family".into(), U128(100), 3, 60, None);
+        let id = c.create_committee("Family".into(), U128(100), 3, 60, None, None);
         callback(0, PromiseResult::Failed);
         assert!(!c.on_dao_created(id, acc("ayesha.testnet"), DAO_DEPOSIT));
         assert_eq!(c.get_committee(id).unwrap().committee.dao, None);
@@ -907,4 +958,45 @@ mod tests {
         assert_eq!(mine[0].committee.id, id);
         assert!(c.get_committees_for(acc("stranger.testnet")).is_empty());
     }
+
+    #[test]
+    fn join_rule_lets_in_only_members_with_a_clean_record() {
+        let (mut c, id) = setup();
+        // Finish the first circle cleanly: everyone pays every round.
+        for r in 1..=3u64 {
+            for who in MEMBERS {
+                pay(&mut c, who, "contribute", id, 100, r * 61_000);
+            }
+            set("sara.testnet", r * 61_000 + 1);
+            c.advance_round(id);
+        }
+        assert_eq!(c.get_reputation(acc("bilal.testnet")).record.finished, 1);
+
+        // A new circle that asks for one clean circle.
+        set("ayesha.testnet", 400_000);
+        let strict = c.create_committee("Strict".into(), U128(100), 3, 60, None, Some(1));
+        assert_eq!(c.get_committee(strict).unwrap().min_clean_circles, 1);
+        pay(&mut c, "bilal.testnet", "join", strict, 100, 400_001);
+        assert_eq!(c.get_committee(strict).unwrap().committee.members.len(), 1);
+
+        // A newcomer is turned away (the token contract refunds them).
+        set("usd.testnet", 400_002);
+        let msg = format!("{{\"action\":\"join\",\"committee_id\":{}}}", strict);
+        let refused = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            c.ft_on_transfer(acc("newcomer.testnet"), U128(100), msg.clone())
+        }));
+        assert!(refused.is_err());
+
+        // The organizer can always take a seat in their own circle.
+        pay(&mut c, "ayesha.testnet", "join", strict, 100, 400_003);
+        assert_eq!(c.get_committee(strict).unwrap().committee.members.len(), 2);
+
+        // Circles without a rule stay open to anyone.
+        set("ayesha.testnet", 400_004);
+        let open = c.create_committee("Open".into(), U128(100), 3, 60, None, None);
+        pay(&mut c, "newcomer.testnet", "join", open, 100, 400_005);
+        assert_eq!(c.get_committee(open).unwrap().min_clean_circles, 0);
+        assert_eq!(c.get_committee(open).unwrap().committee.members.len(), 1);
+    }
+
 }

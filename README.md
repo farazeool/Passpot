@@ -1,32 +1,53 @@
 # Passpot
 
-**The savings circle nobody can run off with.**
+Passpot runs a rotating savings circle (a ROSCA) on NEAR. A group of people each pay the same amount every round, and one member receives the whole pot each round until everyone has had a turn. The same arrangement is called a committee in Pakistan and India, a susu in Ghana, a tanda in Mexico, a chama in Kenya and a hui in China.
 
-A rotating savings circle (economists call it a ROSCA) is one of the oldest ways people save and borrow without banks. Friends or family each pay the same amount every month, and one of them takes the whole pot, until everyone has had a turn. It's a *committee* in Pakistan and India, a *susu* in Ghana and the Caribbean, a *tanda* in Mexico, a *chama* in Kenya, a *hui* in China and a *tontine* in West Africa.
+Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
 
-Circles break in three ways:
-- **Someone takes the pot early and stops paying.** That's why circles usually only work among close family.
-- **The organizer holds all the cash** and can disappear with it.
-- **Nobody can prove who paid**, so disputes happen over notebooks and WhatsApp.
+- **Live app:** https://passpot.vercel.app (NEAR testnet)
+- **Passpot contract:** [`cmt.fatneek-committee.testnet`](https://testnet.nearblocks.io/address/cmt.fatneek-committee.testnet)
+- **Test-dollar token (testUSD):** [`usd.fatneek-committee.testnet`](https://testnet.nearblocks.io/address/usd.fatneek-committee.testnet)
 
-Passpot runs the whole circle on NEAR:
+## The problem
 
-| Problem | What Passpot does |
-| --- | --- |
-| The organizer holds the cash | Each circle gets its **own Sputnik DAO**. Its only council member is the Passpot contract, so no person (not even the organizer) can move the money. Payouts leave through the DAO's own Transfer proposals. |
-| Someone takes the pot and stops paying | Early winners have part of the pot **held back** and released as they keep paying. A missed payment is covered from holdback, then from their deposit, so the next winner still gets the full pot. |
-| Who gets the pot is rigged | An **on-chain lucky draw** using NEAR's random seed (or an agreed order, or discount bidding). The seed is recorded, so anyone can replay the draw. |
-| Nobody can prove who paid | Every payment, payout and draw is an on-chain event. A **Verify page** re-checks everything in your browser, straight from the chain. |
-| Nobody remembers to close the round | The **Passpot agent** runs every five minutes and closes any round whose time is up, covering missed payments and running the draw. Anyone can close a round; the agent makes sure someone always does. |
-| Trust doesn't travel | Finished circles build a **reputation** that lowers your holdback next time: 50% for new members, 25% after one clean circle, none after three. |
+In a normal circle the organizer holds the cash and the record is a notebook. Three things go wrong:
 
-> Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
+1. The organizer can disappear with the money.
+2. A member who gets the pot early can stop paying, and the members still waiting lose out.
+3. Nobody can prove who paid or how the winner was chosen.
 
-## Try it
+## What Passpot does about it
 
-- **Live app:** https://passpot.vercel.app. **Try a demo circle** drops you straight into a live circle already on round 2, where you can act as Ayesha, Bilal or Sara without a wallet. Or connect a NEAR testnet wallet and start your own.
-- **Contracts on testnet:** Passpot `cmt.fatneek-committee.testnet`, test dollars `usd.fatneek-committee.testnet`.
-- **A real circle's DAO:** [`cmt-fatneek-committee-1.sputnikv2.testnet`](https://testnet.nearblocks.io/address/cmt-fatneek-committee-1.sputnikv2.testnet). Proposal #0 paid the round-1 winner.
+| Problem | What the code does | Where |
+| --- | --- | --- |
+| The organizer holds the cash | Each circle can get its own **Sputnik DAO** (via `sputnikv2.testnet`). The Passpot contract is the DAO's only council member. Payments are forwarded into the DAO, and money leaves only through DAO Transfer proposals the contract files and approves when the rules say so. | `contracts/committee/src/lib.rs`: `create_committee`, `forward`, `send` |
+| An early winner stops paying | Part of an early winner's pot is **held back** and released round by round as they keep paying. A missed payment is covered first from holdback, then from the member's deposit. | `contracts/committee/src/core.rs`: `advance`, `holdback_bps_for` |
+| Who gets the pot can be rigged | Three payout modes: an **on-chain lucky draw** from NEAR's random seed (the seed is stored, so anyone can replay it), an **agreed order**, or **bidding**, where a member offers a discount to get the pot sooner and the discount is shared with the others. | `core.rs`: `choose`, `place_bid` |
+| Trust doesn't carry over | A **savings record** per account: clean circles finished, circles with a miss, on-time and missed payments. It sets the holdback (50% for new members, 25% after one clean circle, 0% after three) and can **gate who joins**: an organizer can require joiners to have 1 or 3 clean circles and no missed circles. | `lib.rs`: `reputation`, `check_join_rule` |
+| Nobody can prove what happened | Every payment, payout, bid and draw is an event in the circle's on-chain history. The **Verify** page re-checks the vault balance, the DAO policy, every payout proposal and every draw in the browser, straight from RPC. | `web/src/lib/verify.ts` |
+
+Profiles (name, city, what the member is saving for) are stored on **NEAR Social** under the member's own account.
+
+## Try it (no wallet needed)
+
+1. Open https://passpot.vercel.app and click **Try a demo circle**.
+   You see a live circle that three demo members (Ayesha, Bilal and Sara) are part of. Every action is a real testnet transaction, signed on the server with testnet-only demo keys.
+2. Under "Act as", pick a member who hasn't paid this round yet and click **Pay 10 tUSD**.
+   You see a green tick next to that member in the register and a "… paid" notice with a link to the transaction.
+3. For a full round from scratch, open https://passpot.vercel.app/demo?fresh=1 and click **Set up the demo circle**.
+   You see the six setup steps run one by one (create circle and DAO, join, start), then the circle page.
+4. Pay as Ayesha and Bilal, but not as Sara. When the 90-second round ends, click **Close round and run the draw**.
+   You see Sara marked **Covered** in the register (her deposit paid her share), the pot passing to the winner in the illustration, and a "DAO paid … through proposal #N" line in Activity.
+5. Click **Verify on-chain** at the top of the circle.
+   You see "6 of 6 checks pass", including that the DAO's only voting member is the Passpot contract and that the DAO's token balance matches what the circle expects.
+
+### With your own wallet
+
+1. Click **Connect wallet** and choose **Meteor Wallet** (create a testnet account there). A new account needs a little test NEAR for fees: https://near-faucet.io.
+2. Click **Get test dollars** in the top bar. You see your balance go up by 1,000 tUSD.
+3. Click the avatar in the top bar to **make your profile**. You see it on your profile page, saved to NEAR Social.
+4. Go to **Start a circle**, choose a setup, and pick who can join. After creating it, you see a "Your circle is live" banner, an **Invite on WhatsApp** link, and your seat waiting to be taken.
+5. **Your money** (top bar) lists what you owe this round, money locked as cover, and pots coming to you, with **Google Calendar** and **Apple / Outlook** reminders for each due date.
 
 ## How the money moves
 
@@ -38,70 +59,82 @@ member ──ft_transfer_call──▶ Passpot contract ──ft_transfer──�
                                    └──────────── payout ◀────────────────┘
 ```
 
-1. **Create.** The organizer attaches 6 NEAR. The contract asks the Sputnik factory (`sputnikv2.testnet`) for a DAO whose only council member is the contract. The exact policy is public via `get_dao_policy`.
-2. **Join.** Each member locks one contribution as a deposit (`ft_transfer_call` with `{"action":"join"}`). It's forwarded straight to the DAO.
-3. **Pay.** Each round, members pay in (`{"action":"contribute"}`), forwarded to the DAO.
-4. **Close the round.** Anyone can call `advance_round` once everyone has paid or the time is up. The contract covers misses, picks the recipient, then files a Transfer proposal on the DAO and approves it. The DAO pays.
-5. **Claim.** After the last round, members take back their deposit, any remaining holdback and shared bid discounts, also through DAO proposals.
+1. **Create.** The organizer attaches 6 NEAR (the Sputnik factory's storage price). The contract asks the factory for a DAO whose only council member is the contract. The policy is public via `get_dao_policy`. Without the deposit, the contract itself holds the circle's money (for quick tests).
+2. **Join.** Each member locks one contribution as a deposit: `ft_transfer_call` with `{"action":"join","committee_id":N}`. If the circle has a join rule and the sender's record doesn't meet it, the call panics and the token contract refunds them.
+3. **Pay.** Each round: `{"action":"contribute","committee_id":N}`. Payments are forwarded to the DAO.
+4. **Close the round.** Anyone can call `advance_round` once everyone has paid or the round's time is up. The contract covers misses, picks the recipient, files a Transfer proposal on the DAO and approves it.
+5. **Claim.** After the last round, members take back their deposit, remaining holdback and their share of bid discounts, also through DAO proposals.
 
-Anything that fails partway (a transfer, a forward, the DAO's reply) is recorded and can be retried by anyone: `retry_payout`, `retry_forward`, `recheck_dao`. Nothing is lost.
+Failures partway through (a transfer, a forward, the DAO's reply) are recorded and can be retried by anyone: `retry_payout`, `retry_forward`, `recheck_dao`.
 
-## What's here
+## The agent
+
+`web/src/app/api/agent` closes any round whose time is up, in every circle, and keeps one demo circle running with a round in progress. It is called by a GitHub Actions schedule (`.github/workflows/agent.yml`, set to every 5 minutes; GitHub runs scheduled jobs less often than that on new repositories) and by Vercel Cron once a day. Closing a round needs no special rights: anyone can call `advance_round`, and the circle page shows a **Close round** button to everyone once time is up.
+
+## Repository
 
 | Path | What it is |
 | --- | --- |
-| `contracts/committee` | The Passpot contract (Rust, near-sdk 5). **`src/core.rs` holds every rule with no blockchain code**, so the rules are unit-tested on their own. `src/lib.rs` is the NEAR glue: token payments, Sputnik DAO custody, callbacks. |
-| `contracts/testusd` | testUSD: a NEP-141 test-dollar token (6 decimals) with a `faucet()`, so anyone can try Passpot for free. |
-| `web/src/app/api/agent` | The Passpot agent: closes due rounds in every circle, and keeps one live demo circle ready on round 2. Run by GitHub Actions every five minutes (`.github/workflows/agent.yml`), with Vercel Cron daily as a backup. |
-| `web` | The app (Next.js). Circle page with the circle and the register, the Verify page, the no-wallet demo, create and profile pages. |
-| `scripts` | Testnet scripts (PowerShell): deploy, smoke test, DAO test, demo setup. |
+| `contracts/committee` | The Passpot contract (Rust, near-sdk 5). `src/core.rs` holds every circle rule with no blockchain code, so the rules are unit-tested directly. `src/lib.rs` is the NEAR side: token payments, Sputnik DAO custody, callbacks, reputation, join rules. |
+| `contracts/testusd` | testUSD, a NEP-141 test token (6 decimals) with a public `faucet()`. |
+| `web` | The Next.js app: home, circles list, circle page, Verify, statements, profiles, Your money, Start a circle, About, the no-wallet demo and the agent API. |
+| `web/scripts/test-modes.mjs` | End-to-end check on testnet: runs a full agreed-order circle and a full bidding circle with the demo accounts and checks who received each pot. |
+| `scripts` | PowerShell scripts for testnet: `deploy.ps1`, `upgrade.ps1`, `dao-test.ps1`, `smoke-test.ps1`, `setup-demo.ps1`. |
 
-## Run the tests
+## Tests
 
 ```
 cargo test
 ```
 
-34 tests cover full cycles, conservation of money (everything paid in comes back out), holdback and default cover, every payout mode, bad payments being refunded, and the DAO flow: factory call, forwarding, proposal then approval, failure and retry paths.
+35 unit tests (31 for the Passpot contract, 4 for testUSD): full circles in every payout mode, conservation of money, holdback and default cover, bidding, join rules, rejected payments, and the DAO flow including failure and retry paths.
 
-## Deploy your own (testnet)
-
-Needs Rust with `wasm32-unknown-unknown`, [`cargo-near`](https://github.com/near/cargo-near), [`near-cli-rs`](https://github.com/near/near-cli-rs), and a testnet account with about 20 NEAR.
-
-```
-.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Passpot
-.\scripts\dao-test.ps1 -Account your-name.testnet    # one round through a real Sputnik DAO
-.\scripts\setup-demo.ps1 -Account your-name.testnet  # demo members for the website
-```
-
-Then the web app (locally, or on Vercel with **Root Directory** set to `web`):
+End to end on testnet (needs `web/.env.local` with `DEMO_ACCOUNTS`):
 
 ```
 cd web
-cp .env.example .env.local   # set the contract names; setup-demo.ps1 adds DEMO_ACCOUNTS
+node scripts/test-modes.mjs
+```
+
+## Run your own copy (testnet)
+
+Needs Rust with the `wasm32-unknown-unknown` target, [cargo-near](https://github.com/near/cargo-near), [near-cli-rs](https://github.com/near/near-cli-rs), and a testnet account with about 20 NEAR.
+
+```
+.\scripts\deploy.ps1 -Account your-name.testnet      # testUSD + Passpot
+.\scripts\setup-demo.ps1 -Account your-name.testnet  # demo members for the website
+cd web
+cp .env.example .env.local                          # contract names; setup-demo.ps1 adds DEMO_ACCOUNTS
 npm install
 npm run dev
 ```
 
-On Vercel, set `DEMO_ACCOUNTS` (from `web/.env.local`) and a random `CRON_SECRET`. For the five-minute agent, add two GitHub repository secrets: `ROTA_URL` (your Vercel URL) and the same `CRON_SECRET`.
+On Vercel: Root Directory `web`, environment variables `DEMO_ACCOUNTS` and `CRON_SECRET`. For the scheduled agent, add GitHub secrets `ROTA_URL` (the site's URL) and the same `CRON_SECRET`.
 
-Every circle page also has: an **Invite on WhatsApp** link while seats are open, a **reminder** listing who still owes this round, and a printable **statement** per member.
+## Limits
 
-## Honest limits
+- **Testnet only.** testUSD has no value. Mainnet would use a real stablecoin and needs an audit first.
+- **Holdback and deposits reduce default risk; they don't remove it.** A member who misses more than their holdback and deposit leaves a shortfall in that round's pot. It is recorded on-chain and on their savings record.
+- **The lucky draw uses NEAR's block random seed.** Fair enough for a savings circle, but a block producer could in theory influence it.
+- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. The server only signs calls to the Passpot contract and testUSD.
+- **NEAR Intents** (paying in from other chains) is on the roadmap, not built.
 
-- **Testnet only.** testUSD has no value. Mainnet would use a real stablecoin and need an audit.
-- **Holdback and deposits reduce default risk; they don't remove it.** Someone who misses more than their holdback and deposit leaves a shortfall in that round's pot. It's recorded on-chain and hits their reputation.
-- **The lucky draw uses NEAR's block random seed.** That's fair for a savings circle, but a block producer could in theory influence it. It's not casino-grade randomness.
-- **A DAO costs 6 NEAR** of storage (the Sputnik factory's price). Without the deposit, a circle's money is held by the contract itself, which is useful for quick tests.
-- **Demo members are signed by the website's server** with testnet-only keys, so judges can try it without a wallet. They can only call Passpot and testUSD.
+## Built with
+
+Rust and near-sdk 5.30, cargo-near, Sputnik DAO v2 (`sputnikv2.testnet`), NEAR Social (`v1.social08.testnet`), Next.js 16, React 19, Tailwind CSS 4, near-api-js 7, NEAR Wallet Selector 10 (Meteor, Intear, HERE), Inter (via Fontsource), Playwright (for the demo video).
+
+**AI assistance:** most of the code, copy and the demo video were written with Claude (Anthropic) as a coding assistant, directed and tested by the author. The demo video's voiceover is generated with the open-source Kokoro text-to-speech model.
+
+All code was written during the hackathon window.
 
 ## Roadmap
 
-- Private circles: people request to join, and the organizer approves them by their profile and on-chain savings record.
+- Pay in from any chain with NEAR Intents, so family abroad can pay a member's share directly.
 - Swap turns: two members of an agreed-order circle trade payout rounds when both approve.
-- Pay ahead: cover two or three rounds in advance, for irregular incomes and travel.
-- Pay in from any chain through NEAR Intents (1Click deposit addresses).
-- Reputation as a portable, non-transferable credential other apps can read.
-- A small insurance pool that covers defaults beyond holdback.
+- Pay ahead: cover several rounds in advance.
+- Real stablecoins (USDC) on mainnet after an audit.
 - Urdu and Arabic interface; WhatsApp reminders before due dates.
-- A remittance link: family abroad pays a member's contribution directly.
+
+## License
+
+MIT, see [LICENSE](LICENSE).

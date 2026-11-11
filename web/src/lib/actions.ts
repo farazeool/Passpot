@@ -29,13 +29,22 @@ export interface NewCommittee {
   roundSecs: number;
   mode: PayoutMode;
   withDao: boolean;
+  /** Reputation-based access: clean circles a member needs to join. */
+  minCleanCircles?: number;
 }
 
 export async function createCommittee(a: Actor, c: NewCommittee): Promise<number | undefined> {
   const r = await a.call(
     CONTRACT,
     "create_committee",
-    { name: c.name, amount: c.amount.toString(), size: c.size, round_secs: c.roundSecs, mode: c.mode },
+    {
+      name: c.name,
+      amount: c.amount.toString(),
+      size: c.size,
+      round_secs: c.roundSecs,
+      mode: c.mode,
+      ...(c.minCleanCircles ? { min_clean_circles: c.minCleanCircles } : {}),
+    },
     300,
     c.withDao ? BigInt(DAO_DEPOSIT_NEAR) * NEAR : 0n,
   );

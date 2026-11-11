@@ -100,6 +100,14 @@ function CircleCard({ c, rep, live }: { c: Committee; rep?: Reputation; live?: b
               <span className="num">#{c.id}</span>
               <span aria-hidden>·</span>
               <span>{MODE[c.mode]}</span>
+              {(c.min_clean_circles ?? 0) > 0 && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="text-ink font-medium">
+                    Needs {c.min_clean_circles} clean circle{c.min_clean_circles === 1 ? "" : "s"}
+                  </span>
+                </>
+              )}
               {c.dao && (
                 <>
                   <span className="basis-full inline-flex items-center gap-1 text-ink font-medium" title="Payments sit in this circle's own Sputnik DAO">

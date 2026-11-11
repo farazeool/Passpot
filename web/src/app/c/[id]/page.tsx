@@ -160,6 +160,8 @@ function CommitteePageInner() {
           <p className="mt-2 text-muted">
             {c.size} members pay <span className="num font-semibold text-text">{money(c.amount)} {TOKEN_SYMBOL}</span>{" "}
             every {duration(c.round_secs)}. {MODE_TEXT[c.mode]}.
+            {(c.min_clean_circles ?? 0) > 0 &&
+              ` Only members with ${c.min_clean_circles} clean circle${c.min_clean_circles === 1 ? "" : "s"} on their record can join.`}
           </p>
         </div>
         <div className="flex gap-2">

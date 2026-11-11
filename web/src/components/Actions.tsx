@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getReputation } from "@/lib/near";
 import { useToast } from "./Toast";
 import * as act from "@/lib/actions";
 import type { Actor } from "@/lib/actions";
@@ -23,6 +24,14 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [bidPct, setBidPct] = useState("5");
   const toast = useToast();
+  const rule = c.min_clean_circles ?? 0;
+  const [record, setRecord] = useState<{ finished: number; defaults: number } | null>(null);
+  useEffect(() => {
+    if (!rule || !actor || c.status !== "Open") return;
+    getReputation(actor.accountId)
+      .then((r) => setRecord(r.record))
+      .catch(() => {});
+  }, [rule, actor, c.status]);
 
   const me = actor ? c.members.find((m) => m.account_id === actor.accountId) : undefined;
   const isOrganizer = actor?.accountId === c.organizer;
@@ -86,7 +95,20 @@ export function Actions({ circle: c, actor, onDone, onSignIn, now }: Props) {
             Join by locking a deposit of <strong className="num">{amount}</strong>. You get it back when the circle
             ends; it only covers you if you ever miss a payment.
           </p>
-          {btn(`Join and lock ${amount}`, "Joining…", () => act.join(actor, c), "btn-primary", `${name} joined and locked a ${amount} deposit.`)}
+          {rule > 0 && (
+            <p className="rounded-xl bg-marigold-wash border border-marigold/40 px-3 py-2 text-sm text-ink">
+              This circle only takes members with at least {rule} clean circle{rule === 1 ? "" : "s"} and no missed
+              circles on their savings record.
+              {record && !isOrganizer
+                ? record.defaults === 0 && record.finished >= rule
+                  ? " Your record qualifies."
+                  : ` ${youHave} finished ${record.finished} clean circle${record.finished === 1 ? "" : "s"}${record.defaults ? " and missed one" : ""}, so the contract will turn this join down.`
+                : ""}
+            </p>
+          )}
+          {rule > 0 && record && !isOrganizer && !(record.defaults === 0 && record.finished >= rule)
+            ? null
+            : btn(`Join and lock ${amount}`, "Joining…", () => act.join(actor, c), "btn-primary", `${name} joined and locked a ${amount} deposit.`)}
         </div>,
       );
     } else if (me && c.members.length < c.size) {

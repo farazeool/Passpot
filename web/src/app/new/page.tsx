@@ -97,6 +97,7 @@ export default function NewCommitteePage() {
   const [roundSecs, setRoundSecs] = useState(2592000);
   const [mode, setMode] = useState<PayoutMode>("Draw");
   const [withDao, setWithDao] = useState(true);
+  const [minClean, setMinClean] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
@@ -113,6 +114,7 @@ export default function NewCommitteePage() {
       setRoundSecs(d.roundSecs ?? 2592000);
       setMode(d.mode ?? "Draw");
       setWithDao(d.withDao ?? true);
+      setMinClean(d.minClean ?? 0);
     } catch {
     } finally {
       setLoaded(true);
@@ -121,9 +123,9 @@ export default function NewCommitteePage() {
   useEffect(() => {
     if (!loaded) return;
     try {
-      localStorage.setItem(DRAFT, JSON.stringify({ name, amount, size, roundSecs, mode, withDao }));
+      localStorage.setItem(DRAFT, JSON.stringify({ name, amount, size, roundSecs, mode, withDao, minClean }));
     } catch {}
-  }, [loaded, name, amount, size, roundSecs, mode, withDao]);
+  }, [loaded, name, amount, size, roundSecs, mode, withDao, minClean]);
 
   const nameError = touched && !name.trim() ? "Give the circle a name members will recognise." : null;
   const amountError = touched && !(Number(amount) > 0) ? "Enter an amount above zero." : null;
@@ -141,7 +143,7 @@ export default function NewCommitteePage() {
     setBusy(true);
     setError(null);
     try {
-      const id = await createCommittee(actor, { name: name.trim(), amount: base, size, roundSecs, mode, withDao });
+      const id = await createCommittee(actor, { name: name.trim(), amount: base, size, roundSecs, mode, withDao, minCleanCircles: minClean });
       try {
         localStorage.removeItem(DRAFT);
       } catch {}
@@ -306,6 +308,37 @@ export default function NewCommitteePage() {
               </span>
             </label>
           ))}
+        </fieldset>
+
+        <fieldset className="space-y-3">
+          <legend className="font-semibold text-ink mb-2">Who can join</legend>
+          {[
+            [0, "Anyone with the link", "Good for family and friends you already trust."],
+            [1, "Members with a clean record", "Joiners need at least one finished circle on their savings record and no missed circles."],
+            [3, "Trusted members only", "Joiners need three clean circles. Best for circles with people you don't know well."],
+          ].map(([v, title, text]) => (
+            <label
+              key={v as number}
+              className={`flex gap-3 items-start rounded-2xl border p-4 cursor-pointer ${
+                minClean === v ? "border-ink bg-sheet" : "border-rule bg-sheet/50"
+              }`}
+            >
+              <input
+                type="radio"
+                name="who"
+                className="mt-1 h-5 w-5 shrink-0 accent-[var(--ink)]"
+                checked={minClean === v}
+                onChange={() => setMinClean(v as number)}
+              />
+              <span>
+                <span className="font-semibold text-ink">{title}</span>
+                <span className="block text-sm text-muted">{text}</span>
+              </span>
+            </label>
+          ))}
+          <p className="text-xs text-muted">
+            The contract checks every joiner&apos;s on-chain record. You can always join your own circle.
+          </p>
         </fieldset>
 
         <label className="flex gap-3 items-start card p-4 cursor-pointer">

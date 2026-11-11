@@ -62,6 +62,8 @@ export interface Committee {
   can_advance: boolean;
   held: string;
   unforwarded: string;
+  /** Clean finished circles a member needs to join (0 or missing = anyone). */
+  min_clean_circles?: number;
 }
 
 export interface Reputation {
