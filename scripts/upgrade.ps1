@@ -34,7 +34,9 @@ near contract deploy $App use-file $wasm.FullName without-init-call network-conf
 Check $LASTEXITCODE "Deploying"
 
 Step "Checking the new code: circle #1 should now report its join rule"
-$out = near contract call-function as-read-only $App get_committee json-args '{"committee_id":1}' network-config testnet now 2>&1 | Out-String
+# base64 args: PowerShell strips the quotes out of JSON passed to native programs
+$args64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('{"committee_id":1}'))
+$out = near contract call-function as-read-only $App get_committee base64-args $args64 network-config testnet now 2>&1 | Out-String
 if ($out -match "min_clean_circles") {
     Write-Host "`nDone. The upgrade is live: circles can now require a clean savings record." -ForegroundColor Green
 } else {
