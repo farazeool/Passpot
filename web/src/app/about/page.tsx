@@ -15,7 +15,7 @@ const WHY_NEAR: [string, string][] = [
   ],
   [
     "Names people can read",
-    "Accounts look like ayesha.near, not a 42-character address. That matters when you're checking who is in your circle.",
+    "Accounts can have names like ayesha.near instead of a long string of characters, so you can see at a glance who is in your circle.",
   ],
   [
     "A vault per circle",
@@ -50,15 +50,15 @@ export default function AboutPage() {
           use them to pay for weddings, school fees, a shop&apos;s stock or a motorbike.
         </p>
         <p className="mt-4 text-lg sm:text-xl text-text">
-          They all share one weak point: the money sits with the organizer, and the record is a notebook. When the
-          organizer disappears or a member stops paying, the circle collapses, and that is why most circles only
-          ever happen between close family.
+          They share the same weak spots: the money sits with the organizer, and the record is a notebook. When the
+          organizer disappears or a member stops paying, the circle collapses, which is why so many circles never
+          grow beyond close family.
         </p>
       </div>
 
       <section className="mt-16 grid gap-6 lg:grid-cols-3" aria-label="What Passpot changes">
         {[
-          ["The money", "sits in a vault with its own rules, not in anyone's pocket. Not even the organizer can move it."],
+          ["The money", "sits in the circle's own vault, not in anyone's pocket. Only the circle's rules can move it, not the organizer."],
           ["The turns", "are decided by an on-chain draw, the agreed order or a bid. Anyone can check every result."],
           ["The trust", "is earned. Every payment builds an on-chain savings record, and a good record means less held back."],
         ].map(([t, d]) => (
