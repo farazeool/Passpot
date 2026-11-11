@@ -3,7 +3,7 @@
 import { CONTRACT, TOKEN, TOKEN_SYMBOL } from "./config";
 import { displayName, money } from "./format";
 import { drawSeed } from "./ledger";
-import { getTokenBalance, view } from "./near";
+import { fullAccessKeys, getTokenBalance, view } from "./near";
 import type { Committee } from "./types";
 
 export interface Check {
@@ -176,7 +176,22 @@ export async function runChecks(c: Committee): Promise<Check[]> {
     items: drawItems,
   });
 
-  // 6. Nobody paid twice, nobody received twice.
+  // 6. The rules can't be changed: nobody holds a key that could replace the contract's code.
+  try {
+    const keys = await fullAccessKeys(CONTRACT);
+    checks.push({
+      title: "Nobody can change the rules",
+      ok: keys.length === 0,
+      detail:
+        keys.length === 0
+          ? `The Passpot contract (${CONTRACT}) has no full-access keys, so nobody, including its author, can replace its code or move money outside its rules.`
+          : `The Passpot contract still has ${keys.length} full-access key${keys.length === 1 ? "" : "s"}, so its author could still upgrade it.`,
+    });
+  } catch (e) {
+    checks.push({ title: "Nobody can change the rules", ok: false, detail: `Couldn't read the contract's keys: ${e}` });
+  }
+
+  // 7. Nobody paid twice, nobody received twice.
   const seen = new Set<string>();
   let doubles = 0;
   for (const e of c.events) {

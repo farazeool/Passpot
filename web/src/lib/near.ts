@@ -63,3 +63,13 @@ export const getReputation = (account_id: string) => view<Reputation>(CONTRACT, 
 export const getConfig = () => view<ContractConfig>(CONTRACT, "get_config");
 export const getTokenBalance = async (account_id: string) =>
   BigInt((await view<string>(TOKEN, "ft_balance_of", { account_id })) ?? "0");
+
+/** Full-access keys on an account. None means nobody can change its contract code. */
+export async function fullAccessKeys(accountId: string): Promise<string[]> {
+  const r = await rpc<{ keys: { public_key: string; access_key: { permission: unknown } }[] }>("query", {
+    request_type: "view_access_key_list",
+    finality: "final",
+    account_id: accountId,
+  });
+  return r.keys.filter((k) => k.access_key.permission === "FullAccess").map((k) => k.public_key);
+}
