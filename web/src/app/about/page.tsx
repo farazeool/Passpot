@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { REPO_URL } from "@/lib/config";
 import { Tilt } from "@/components/Tilt";
 
 export const metadata: Metadata = {
@@ -113,8 +114,8 @@ export default function AboutPage() {
           <Link href="/demo" className="btn btn-pot">
             Try a demo circle
           </Link>
-          {process.env.NEXT_PUBLIC_REPO_URL && (
-            <a href={process.env.NEXT_PUBLIC_REPO_URL} className="btn btn-quiet" rel="noreferrer">
+          {REPO_URL && (
+            <a href={REPO_URL} className="btn btn-quiet" rel="noreferrer">
               Read the code
             </a>
           )}

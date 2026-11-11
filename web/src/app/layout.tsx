@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { ToastProvider } from "@/components/Toast";
 import { themeScript } from "@/components/ThemeToggle";
 import { WalletProvider } from "@/lib/wallet";
+import { REPO_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Passpot — the savings circle nobody can run off with",
@@ -32,8 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <footer className="border-t border-rule mt-24 print:hidden">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-muted flex flex-wrap gap-x-6 gap-y-2">
               <span>Passpot runs on NEAR testnet. Test dollars have no value.</span>
-              {process.env.NEXT_PUBLIC_REPO_URL && (
-                <a className="link" href={process.env.NEXT_PUBLIC_REPO_URL} rel="noreferrer">
+              {REPO_URL && (
+                <a className="link" href={REPO_URL} rel="noreferrer">
                   Source code
                 </a>
               )}
