@@ -5,7 +5,7 @@ Passpot runs a rotating savings circle (a ROSCA) on NEAR. A group of people each
 Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
 
 - **Live app:** https://passpot.vercel.app (NEAR testnet)
-- **Passpot contract:** [`cmt.fatneek-committee.testnet`](https://testnet.nearblocks.io/address/cmt.fatneek-committee.testnet)
+- **Passpot contract:** [`cmt.fatneek-committee.testnet`](https://testnet.nearblocks.io/address/cmt.fatneek-committee.testnet) (locked: it has no access keys, so its code can never be changed. Check it on any circle's Verify page.)
 - **Test-dollar token (testUSD):** [`usd.fatneek-committee.testnet`](https://testnet.nearblocks.io/address/usd.fatneek-committee.testnet)
 
 ## The problem
