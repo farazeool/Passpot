@@ -12,6 +12,7 @@ import { getCommitteesFor, getTokenBalance } from "@/lib/near";
 import type { Committee, Member } from "@/lib/types";
 import { useTitle } from "@/lib/useTitle";
 import { useWallet } from "@/lib/wallet";
+import { useName } from "@/lib/profile";
 
 const locked = (m: Member) => BigInt(m.deposit) + BigInt(m.holdback) + BigInt(m.bonus);
 const pot = (c: Committee) => BigInt(c.amount) * BigInt(c.size);
@@ -66,7 +67,16 @@ function PayButton({ c, onDone }: { c: Committee; onDone: () => void }) {
 
 export default function MoneyPage() {
   useTitle("Your money");
-  const { accountId, signIn, ready } = useWallet();
+  const { accountId: walletId, signIn, ready } = useWallet();
+  // ?account=… shows anyone's circles read-only: it's all public data on NEAR.
+  const [viewAs, setViewAs] = useState<string | null>(null);
+  useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("account");
+    if (a && /^[a-z0-9._-]{2,64}$/.test(a)) setViewAs(a);
+  }, []);
+  const accountId = viewAs ?? walletId;
+  const readOnly = !!viewAs && viewAs !== walletId;
+  const ownerName = useName(accountId ?? "");
   const [circles, setCircles] = useState<Committee[] | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -135,8 +145,14 @@ export default function MoneyPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
-      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">Your money</h1>
-      <p className="mt-2 text-text">Everything you owe, have locked and have coming, across all your circles.</p>
+      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-ink">
+        {readOnly ? `${ownerName.split(" ")[0]}'s money` : "Your money"}
+      </h1>
+      <p className="mt-2 text-text">
+        {readOnly
+          ? "A read-only view of this account's circles, straight from NEAR. Everything here is public on-chain."
+          : "Everything you owe, have locked and have coming, across all your circles."}
+      </p>
 
       <dl className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-px rounded-3xl overflow-hidden border border-rule bg-rule">
         {stats.map(([label, value, sub], i) => (
@@ -182,7 +198,7 @@ export default function MoneyPage() {
                     </p>
                   )}
                   <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <PayButton c={c} onDone={load} />
+                    {!readOnly && <PayButton c={c} onDone={load} />}
                     <CalendarButtons circle={c} unpaid compact />
                   </div>
                 </li>
