@@ -161,7 +161,7 @@ On Vercel: Root Directory `web`, environment variables `DEMO_ACCOUNTS` and `CRON
 
 Rust and near-sdk 5.30, cargo-near, Sputnik DAO v2 (`sputnikv2.testnet`), NEAR Social (`v1.social08.testnet`), Next.js 16, React 19, Tailwind CSS 4, near-api-js 7, NEAR Wallet Selector 10 (Meteor, Intear, HERE), Inter (via Fontsource), Playwright (for the demo video).
 
-**AI assistance:** most of the code, copy and the demo video were written with Claude (Anthropic) as a coding assistant, directed and tested by the author. The demo video's voiceover is generated with the open-source Kokoro text-to-speech model.
+**AI assistance:** most of the code, copy and the demo video were written with an AI coding assistant, directed and tested by the author. The demo video's voiceover is generated with the open-source Kokoro text-to-speech model.
 
 All code was written during the hackathon window.
 

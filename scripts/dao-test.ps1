@@ -23,7 +23,7 @@ $Amount = "10000000"   # 10 tUSD (6 decimals)
 
 function B64([string]$json) { [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json)) }
 function Step([string]$text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
-function Stop([string]$text) { Write-Host "`nSTOPPED: $text Send the output above to Claude." -ForegroundColor Red; exit 1 }
+function Stop([string]$text) { Write-Host "`nSTOPPED: $text See the output above." -ForegroundColor Red; exit 1 }
 
 # Sends a transaction and returns what the method returned (stdout).
 function Call($contract, $method, $json, $signer, $deposit = '0 NEAR', $gas = '100.0 Tgas') {

@@ -28,7 +28,7 @@ foreach ($m in $members) {
     $amount = if ($m.id -like "ayesha-demo.*") { $AyeshaNear } else { $MemberNear }
     Step "Creating $($m.id) with $amount"
     near account create-account fund-myself $m.id $amount use-manually-provided-public-key $m.publicKey sign-as $Account network-config testnet sign-with-keychain send
-    if ($LASTEXITCODE -ne 0) { Write-Host "STOPPED: creating $($m.id) failed. Send the error above to Claude." -ForegroundColor Red; exit 1 }
+    if ($LASTEXITCODE -ne 0) { Write-Host "STOPPED: creating $($m.id) failed. See the error above." -ForegroundColor Red; exit 1 }
 }
 
 Step "Done"

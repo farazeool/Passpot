@@ -26,7 +26,7 @@ function B64([string]$json) {
 function Step([string]$text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
 function Check([int]$code, [string]$what) {
     if ($code -ne 0) {
-        Write-Host "`nSTOPPED: $what failed. Send the error above to Claude." -ForegroundColor Red
+        Write-Host "`nSTOPPED: $what failed. See the error above." -ForegroundColor Red
         exit 1
     }
 }
@@ -40,7 +40,7 @@ function HasCode([string]$acc) {
 }
 function Verify([string]$acc) {
     if (-not (HasCode $acc)) {
-        Write-Host "`nSTOPPED: $acc still has no contract code. Send the output above to Claude." -ForegroundColor Red
+        Write-Host "`nSTOPPED: $acc still has no contract code. See the output above." -ForegroundColor Red
         exit 1
     }
 }

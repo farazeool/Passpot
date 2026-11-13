@@ -125,6 +125,6 @@ check(!!bidEvent, "the bid is in the circle's history");
 
 console.log(
   failures
-    ? `\n${failures} check(s) FAILED. Paste this whole output to Claude.`
+    ? `\n${failures} check(s) FAILED. See the output above for which check failed.`
     : `\nAll checks passed. Circles #${order.id} and #${bidding.id} are on the site for you to look at.`,
 );

@@ -21,7 +21,7 @@ function Step([string]$text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
 function Call($contract, $method, $json, $signer, $deposit = '0 NEAR') {
     near contract call-function as-transaction $contract $method base64-args (B64 $json) prepaid-gas '100.0 Tgas' attached-deposit $deposit sign-as $signer network-config testnet sign-with-keychain send
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "`nSTOPPED: $method by $signer failed. Send the error above to Claude." -ForegroundColor Red
+        Write-Host "`nSTOPPED: $method by $signer failed. See the error above." -ForegroundColor Red
         exit 1
     }
 }

@@ -15,7 +15,7 @@ $App = "$AppName.$Account"
 function Step([string]$text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
 function Check([int]$code, [string]$what) {
     if ($code -ne 0) {
-        Write-Host "`nSTOPPED: $what failed. Send the error above to Claude." -ForegroundColor Red
+        Write-Host "`nSTOPPED: $what failed. See the error above." -ForegroundColor Red
         exit 1
     }
 }
@@ -41,6 +41,6 @@ if ($out -match "min_clean_circles") {
     Write-Host "`nDone. The upgrade is live: circles can now require a clean savings record." -ForegroundColor Green
 } else {
     Write-Host $out
-    Write-Host "`nSTOPPED: the new field isn't there yet. Send the output above to Claude." -ForegroundColor Red
+    Write-Host "`nSTOPPED: the new field isn't there yet. See the output above." -ForegroundColor Red
     exit 1
 }
