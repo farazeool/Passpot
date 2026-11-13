@@ -1,6 +1,28 @@
-# Passpot
+<p align="center">
+  <img src="docs/icon.svg" width="72" alt="Passpot">
+</p>
 
-Passpot runs a rotating savings circle (a ROSCA) on NEAR. A group of people each pay the same amount every round, and one member receives the whole pot each round until everyone has had a turn. The same arrangement is called a committee in Pakistan and India, a susu in Ghana, a tanda in Mexico, a chama in Kenya and a hui in China.
+<h1 align="center">Passpot</h1>
+
+<p align="center"><b>The savings circle nobody can run off with.</b> A rotating savings circle (ROSCA) on NEAR, where the pot sits in its own DAO and pays out by rule.</p>
+
+<p align="center">
+  <a href="https://passpot.vercel.app"><img alt="Live demo" src="https://img.shields.io/badge/live%20demo-passpot.vercel.app-111111"></a>
+  <a href="https://testnet.nearblocks.io/address/cmt.fatneek-committee.testnet"><img alt="NEAR testnet" src="https://img.shields.io/badge/NEAR-testnet-22306b"></a>
+  <a href="#tests"><img alt="35 tests passing" src="https://img.shields.io/badge/tests-35%20passing-1f8a5b"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e3a21a"></a>
+</p>
+
+<p align="center">
+  <a href="https://x.com/Fatneek117/status/2120447478705074247"><b>▶ Watch the 2-minute demo</b></a> ·
+  <a href="https://passpot.vercel.app/demo">Try a demo circle, no wallet needed</a>
+</p>
+
+<p align="center">
+  <img src="docs/demo-circle.png" alt="A live Passpot demo circle on NEAR testnet: three members around the pot, who has paid this round, and the round 1 payout chosen by lucky draw" width="900">
+</p>
+
+A group of people each pay the same amount every round, and one member receives the whole pot each round until everyone has had a turn. The same arrangement is called a committee in Pakistan and India, a susu in Ghana, a tanda in Mexico, a chama in Kenya and a hui in China.
 
 Built at NEAR HACKATHON for the **Social Money** and **Real-World Money** tracks.
 
@@ -54,6 +76,8 @@ A contract holding the money stops the organizer running off. Passpot also cover
 5. Click **Verify on-chain** at the top of the circle.
    You see every check pass (7 for a DAO circle), including that nobody holds a key to the Passpot contract, that the DAO's only voting member is the Passpot contract and that the DAO's token balance matches what the circle expects.
 
+<p align="center"><img src="docs/verify.png" alt="The Verify page: 7 of 7 checks pass, read straight from NEAR in the browser" width="760"></p>
+
 ### With your own wallet
 
 1. Click **Connect wallet** and choose **Meteor Wallet** (create a testnet account there). A new account needs a little test NEAR for fees: https://near-faucet.io.
@@ -64,12 +88,13 @@ A contract holding the money stops the organizer running off. Passpot also cover
 
 ## How the money moves
 
-```
-member ──ft_transfer_call──▶ Passpot contract ──ft_transfer──▶ the circle's Sputnik DAO
-                                   │                                     │
-                    rules: draw, holdback,              add_proposal(Transfer) + act_proposal(VoteApprove)
-                    default cover, reputation                            │
-                                   └──────────── payout ◀────────────────┘
+```mermaid
+flowchart LR
+    M["Member"] -- "ft_transfer_call<br/>join / contribute" --> C["Passpot contract<br/>(no access keys)"]
+    C -- "ft_transfer<br/>forward every payment" --> D[("The circle's own<br/>Sputnik DAO")]
+    C -. "add_proposal(Transfer)<br/>+ act_proposal(VoteApprove)" .-> D
+    D -- "payout or claim,<br/>only by approved proposal" --> W["This round's winner"]
+    C --- R["Rules: draw · agreed order · bidding<br/>holdback · default cover · savings record"]
 ```
 
 1. **Create.** The organizer attaches 6 NEAR (the Sputnik factory's storage price). The contract asks the factory for a DAO whose only council member is the contract. The policy is public via `get_dao_policy`. Without the deposit, the contract itself holds the circle's money (for quick tests).
