@@ -27,6 +27,39 @@ const WHY_NEAR: [string, string][] = [
   ],
 ];
 
+const COMPARE: [string, string, string][] = [
+  [
+    "The organizer runs off",
+    "The contract holds the pot.",
+    "Each circle's own Sputnik DAO holds it, and the Passpot contract has no keys, so nobody can change the rules. The Verify page proves both.",
+  ],
+  [
+    "An early winner stops paying",
+    "The members still waiting lose out, or have to vote on what to do.",
+    "Part of an early pot is held back and released round by round. A missed payment is covered automatically, from holdback first, then the member's deposit.",
+  ],
+  [
+    "Arguing over who goes first",
+    "One fixed order.",
+    "A lucky draw anyone can replay, an agreed order, or bidding, where a member gives up a little to go sooner and the others share it.",
+  ],
+  [
+    "The money loses value",
+    "Contributions in a coin whose price moves.",
+    "Contributions in dollars (testUSD here, USDC on mainnet), so a 100-dollar pot stays 100 dollars.",
+  ],
+  [
+    "Strangers can't be trusted",
+    "Anyone joins on equal terms.",
+    "A savings record follows each member. It sets how much is held back and lets an organizer accept only people with clean circles.",
+  ],
+  [
+    "Trying it out",
+    "Connect a wallet and fund it first.",
+    "One click: a live demo circle with three members you can act as, no wallet needed.",
+  ],
+];
+
 const NEXT: [string, string][] = [
   ["Private circles", "People ask to join, and the organizer approves them by their profile and on-chain savings record."],
   ["Swap turns", "Two members of an agreed-order circle trade payout rounds when both say yes."],
@@ -67,6 +100,36 @@ export default function AboutPage() {
             <p className="mt-2 text-text">{d}</p>
           </Tilt>
         ))}
+      </section>
+
+      <section className="mt-20" aria-labelledby="beyond">
+        <h2 id="beyond" className="font-display text-3xl sm:text-4xl font-semibold text-ink">
+          A contract holding the pot is only step one
+        </h2>
+        <p className="mt-4 max-w-3xl text-lg text-text">
+          Putting the money in a smart contract stops the organizer running off. Circles break in other ways too, and
+          Passpot handles those in the contract as well.
+        </p>
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-rule">
+          <table className="w-full min-w-[640px] text-left">
+            <thead className="bg-paper text-sm text-muted">
+              <tr>
+                <th className="px-5 py-3 font-semibold">What goes wrong</th>
+                <th className="px-5 py-3 font-semibold">A basic on-chain circle</th>
+                <th className="px-5 py-3 font-semibold text-ink">Passpot</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-rule">
+              {COMPARE.map(([problem, basic, ours]) => (
+                <tr key={problem} className="align-top">
+                  <td className="px-5 py-4 font-semibold text-ink">{problem}</td>
+                  <td className="px-5 py-4 text-muted">{basic}</td>
+                  <td className="px-5 py-4 text-text">{ours}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="mt-20" aria-labelledby="near">

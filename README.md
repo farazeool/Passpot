@@ -28,6 +28,19 @@ In a normal circle the organizer holds the cash and the record is a notebook. Th
 
 Profiles (name, city, what the member is saving for) are stored on **NEAR Social** under the member's own account.
 
+### Beyond "the contract holds the pot"
+
+A contract holding the money stops the organizer running off. Passpot also covers the other ways circles break:
+
+| What goes wrong | A basic on-chain circle | Passpot |
+| --- | --- | --- |
+| An early winner stops paying | The members still waiting lose out, or vote on it | Holdback released round by round; a miss is covered automatically from holdback, then deposit |
+| Arguing over who goes first | One fixed order | Replayable lucky draw, agreed order, or bidding with the discount shared |
+| The money loses value | Paid in a coin whose price moves | Paid in dollars (testUSD here, USDC on mainnet) |
+| Strangers can't be trusted | Everyone joins on equal terms | A savings record sets the holdback and can gate who joins |
+| Proving it's safe | Read the explorer | Verify page re-checks the DAO, the balances, every payout and draw, and that the contract has no keys |
+| Trying it out | Connect and fund a wallet | One-click demo circle, no wallet |
+
 ## Try it (no wallet needed)
 
 1. Open https://passpot.vercel.app and click **Try a demo circle**.
@@ -39,7 +52,7 @@ Profiles (name, city, what the member is saving for) are stored on **NEAR Social
 4. Pay as Ayesha and Bilal, but not as Sara. When the 90-second round ends, click **Close round and run the draw**.
    You see Sara marked **Covered** in the register (her deposit paid her share), the pot passing to the winner in the illustration, and a "DAO paid … through proposal #N" line in Activity.
 5. Click **Verify on-chain** at the top of the circle.
-   You see "6 of 6 checks pass", including that the DAO's only voting member is the Passpot contract and that the DAO's token balance matches what the circle expects.
+   You see every check pass (7 for a DAO circle), including that nobody holds a key to the Passpot contract, that the DAO's only voting member is the Passpot contract and that the DAO's token balance matches what the circle expects.
 
 ### With your own wallet
 
