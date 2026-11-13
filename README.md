@@ -163,6 +163,8 @@ Rust and near-sdk 5.30, cargo-near, Sputnik DAO v2 (`sputnikv2.testnet`), NEAR S
 
 **AI assistance:** most of the code, copy and the demo video were written with an AI coding assistant, directed and tested by the author. The demo video's voiceover is generated with the open-source Kokoro text-to-speech model.
 
+**Our other NEAR HACKATHON project:** [Corridor Index](https://github.com/farazeool/corridor-index), a re-runnable investment thesis on where NEAR Intents beats remittance incumbents, corridor by corridor (Investment Thesis track).
+
 All code was written during the hackathon window.
 
 ## Roadmap
